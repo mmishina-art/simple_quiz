@@ -17,18 +17,38 @@ export function initDebug(app) {
   const params = new URLSearchParams(location.search);
   if (params.has('debug')) setOn(params.get('debug') !== '0');
 
-  // タイトルを7回つづけてタップで切りかえ
+  // タイトルを7回つづけてタップで切りかえ（3回目から「あと○回」と表示）
+  const TAPS = 7;
   let taps = 0;
   let tapTimer = null;
+  const toast = document.createElement('div');
+  toast.className = 'toast debug-toast';
+  toast.hidden = true;
+  document.body.append(toast);
+  let toastTimer = null;
+  const showToast = (text, ms = 1500) => {
+    toast.textContent = text;
+    toast.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { toast.hidden = true; }, ms);
+  };
   document.querySelector('.hero h1').addEventListener('click', () => {
     taps++;
+    app.sound.tap();
     clearTimeout(tapTimer);
-    tapTimer = setTimeout(() => { taps = 0; }, 1500);
-    if (taps >= 7) {
+    tapTimer = setTimeout(() => { taps = 0; }, 2000);
+    if (taps >= TAPS) {
       taps = 0;
       setOn(!isOn());
       render();
-      alert(isOn() ? 'デバッグモードをオンにしました（ホームのいちばん下）' : 'デバッグモードをオフにしました');
+      if (isOn()) {
+        showToast('🛠 デバッグモード オン（ホームのいちばん下）', 2500);
+        document.querySelector('#debug-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        showToast('デバッグモード オフ', 2000);
+      }
+    } else if (taps >= 3) {
+      showToast(`あと${TAPS - taps}回で デバッグモード${isOn() ? 'オフ' : 'オン'}`);
     }
   });
 

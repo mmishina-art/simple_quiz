@@ -453,7 +453,7 @@ $('#home-buddy').addEventListener('click', () => {
 });
 // デバッグモード（?debug をURLにつけるか、タイトルを7回タップ）
 initDebug({
-  state, saveState, growth, setChara, renderHomeBuddy, playEvolution, checkEvolution, say, line,
+  state, saveState, growth, setChara, renderHomeBuddy, playEvolution, checkEvolution, say, line, sound,
   growthIds: [...GROWTH_IDS],
 });
 

@@ -32,6 +32,8 @@ html, body {
   margin: 0;
   height: 100%;
 }
+/* すばやく何回タップしても「ダブルタップで拡大」にならないようにする */
+html { touch-action: manipulation; }
 
 body {
   background: var(--bg);
@@ -77,6 +79,13 @@ button {
   letter-spacing: 0.05em;
   color: var(--primary);
   text-shadow: 0 3px 0 rgba(0, 0, 0, 0.08);
+}
+.hero h1 {
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
 }
 .grade-badge {
   display: inline-block;
@@ -573,6 +582,7 @@ button {
 }
 
 /* ---------- デバッグモード ---------- */
+.debug-toast { z-index: 60; white-space: nowrap; }
 .debug-panel {
   margin-top: 24px;
   padding: 12px;
