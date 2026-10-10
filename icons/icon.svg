@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#ff9f1c"/>
+  <path d="M120 120h272a40 40 0 0 1 40 40v152a40 40 0 0 1-40 40H236l-64 44v-44h-44a40 40 0 0 1-40-40V160a40 40 0 0 1 40-40z" fill="#fff"/>
+  <text x="256" y="300" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="900" font-size="190" fill="#ff9f1c">?</text>
+  <g>
+    <circle cx="146" cy="452" r="30" fill="#3a86ff"/><circle cx="218" cy="452" r="30" fill="#2bb673"/>
+    <circle cx="294" cy="452" r="30" fill="#e8505b"/><circle cx="366" cy="452" r="30" fill="#8338ec"/>
+  </g>
+</svg>
