@@ -4,6 +4,7 @@ import { englishCategories, englishQuestions } from './data/english.js';
 import { createSound } from './sound.js';
 import { loadState, saveState } from './storage.js';
 import { charaSVG, line, stageFor, STAGES, MAX_STAGE, THRESHOLDS } from './chara.js';
+import { initDebug } from './debug.js';
 
 const ROUND_SIZE = 10;
 const CURRENT_GRADE = 5; // ひとまず5年生向け。学年を増やすときはここを設定画面から変えられるようにする。
@@ -127,8 +128,13 @@ let evolving = false;
 async function checkEvolution() {
   const { stage } = growth();
   if (evolving || stage <= state.stageSeen) return;
+  await playEvolution(state.stageSeen, stage, { save: true });
+}
+
+// 進化の演出。save: false のときは見るだけ（デバッグ用。記録は変わらない）
+async function playEvolution(from, stage, { save }) {
+  if (evolving) return;
   evolving = true;
-  const from = state.stageSeen;
   const overlay = $('#evolve');
   const chara = $('#evolve-chara');
   const ok = $('#evolve-ok');
@@ -156,8 +162,10 @@ async function checkEvolution() {
   if (!fast) spawnConfetti();
   $('#evolve-title').textContent = '🎉 しんかした！ 🎉';
   $('#evolve-msg').textContent = `${state.charaName}は Lv.${stage}「${STAGES[stage].name}」になった！`;
-  state.stageSeen = stage;
-  saveState(state);
+  if (save) {
+    state.stageSeen = stage;
+    saveState(state);
+  }
   await wait(fast ? 0 : 900);
   ok.hidden = false;
   ok.focus();
@@ -443,6 +451,12 @@ $('#home-buddy').addEventListener('click', () => {
   clearTimeout(chara._timer);
   chara._timer = setTimeout(() => setChara(chara, stage, 'normal'), 1600);
 });
+// デバッグモード（?debug をURLにつけるか、タイトルを7回タップ）
+initDebug({
+  state, saveState, growth, setChara, renderHomeBuddy, playEvolution, checkEvolution, say, line,
+  growthIds: [...GROWTH_IDS],
+});
+
 $('#rename-btn').addEventListener('click', () => {
   const name = prompt('キャラクターの なまえを入れてね（8文字まで）', state.charaName);
   if (name == null) return;
