@@ -23,6 +23,21 @@
         <p class="grade-badge"><span id="grade-label">5年生</span>むけ</p>
       </header>
 
+      <section class="buddy-card">
+        <button id="home-buddy" class="home-buddy" aria-label="キャラクターをなでる">
+          <span id="home-bubble" class="bubble" hidden></span>
+          <span id="home-chara" class="chara mood-normal"></span>
+        </button>
+        <div class="buddy-info">
+          <p class="buddy-name"><span id="chara-name"></span><button id="rename-btn" class="icon-btn" aria-label="なまえをかえる">✏️</button></p>
+          <p class="buddy-stage">Lv.<span id="chara-level"></span>　<span id="chara-stage"></span></p>
+          <div class="growth" role="progressbar" aria-label="つぎの進化まで"><div id="growth-bar" class="growth-bar"></div></div>
+          <p id="growth-text" class="growth-text"></p>
+        </div>
+        <div id="dex" class="dex" aria-label="しんかのきろく"></div>
+        <p class="buddy-hint">国語・算数・理科・社会・英語で正解した問題がふえると成長するよ</p>
+      </section>
+
       <div class="mode-list">
         <button class="mode-card mode-school" data-mode="school">
           <span class="mode-emoji" aria-hidden="true">📝</span>
@@ -96,6 +111,7 @@
         <p id="result-stars" class="result-stars" aria-hidden="true"></p>
         <p id="result-message" class="result-message"></p>
         <p id="result-best" class="result-best"></p>
+        <p id="result-growth" class="result-growth"></p>
       </div>
 
       <div class="result-actions">
@@ -107,6 +123,22 @@
       <ol id="result-list" class="result-list"></ol>
     </section>
   </main>
+
+  <!-- クイズ中に画面のはしで応えんしてくれるキャラ -->
+  <div id="buddy" class="buddy" hidden>
+    <span id="buddy-bubble" class="bubble" hidden></span>
+    <span id="buddy-chara" class="chara mood-cheer"></span>
+  </div>
+
+  <!-- 進化の演出 -->
+  <div id="evolve" class="evolve" hidden>
+    <div class="evolve-rays" aria-hidden="true"></div>
+    <div id="confetti" class="confetti" aria-hidden="true"></div>
+    <p id="evolve-title" class="evolve-title"></p>
+    <div id="evolve-chara" class="chara evolve-chara"></div>
+    <p id="evolve-msg" class="evolve-msg"></p>
+    <button id="evolve-ok" class="primary-btn evolve-ok" hidden>やったー！</button>
+  </div>
 
   <div id="update-toast" class="toast" hidden>
     新しいバージョンがあります

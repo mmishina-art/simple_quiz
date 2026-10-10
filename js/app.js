@@ -3,6 +3,7 @@ import { triviaCategories, triviaQuestions } from './data/trivia.js';
 import { englishCategories, englishQuestions } from './data/english.js';
 import { createSound } from './sound.js';
 import { loadState, saveState } from './storage.js';
+import { charaSVG, line, stageFor, STAGES, MAX_STAGE } from './chara.js';
 
 const ROUND_SIZE = 10;
 const CURRENT_GRADE = 5; // ひとまず5年生向け。学年を増やすときはここを設定画面から変えられるようにする。
@@ -32,6 +33,10 @@ const MODES = {
 const ALL = 'all';
 const REVIEW = 'review';
 
+// キャラの成長に数えるモード（5教科＝国語・算数・理科・社会・英語）
+const GROWTH_MODES = ['school', 'english'];
+const GROWTH_IDS = new Set(GROWTH_MODES.flatMap((m) => Object.values(MODES[m].questions).flat().map((q) => q.id)));
+
 function withIds(mode, cat, list) {
   return list.map((q, i) => ({ ...q, id: `${mode}:${cat}:${i}`, mode, cat }));
 }
@@ -53,6 +58,125 @@ const screens = {
 function show(name) {
   for (const [key, el] of Object.entries(screens)) el.classList.toggle('active', key === name);
   window.scrollTo(0, 0);
+  // クイズ中と結果画面では、画面のはしにキャラが出てくる
+  $('#buddy').hidden = !(name === 'quiz' || name === 'result');
+  if (name === 'home') renderHomeBuddy();
+  if (name !== 'quiz') checkEvolution();
+}
+
+// ---------- 育成 ----------
+function growth() {
+  const solved = state.solved.filter((id) => GROWTH_IDS.has(id)).length;
+  const total = GROWTH_IDS.size;
+  const stage = stageFor(solved / total);
+  // 表示する段階は、進化の演出を見せたところまで（問題が増えて割合が下がっても退化はしない）
+  const shown = state.stageSeen;
+  const nextAt = shown >= MAX_STAGE ? null : Math.ceil((total * (shown + 1)) / 10);
+  return { solved, total, stage, shown, rate: solved / total, toNext: nextAt == null ? 0 : Math.max(0, nextAt - solved) };
+}
+
+function setChara(target, stage, mood) {
+  target.innerHTML = charaSVG(stage, mood);
+  target.className = `chara mood-${mood}`;
+  // アニメーションを毎回やり直す
+  void target.offsetWidth;
+}
+
+function say(bubble, text, ms = 0) {
+  bubble.textContent = text;
+  bubble.hidden = false;
+  bubble.classList.remove('pop');
+  void bubble.offsetWidth;
+  bubble.classList.add('pop');
+  clearTimeout(bubble._timer);
+  if (ms) bubble._timer = setTimeout(() => { bubble.hidden = true; }, ms);
+}
+
+function renderHomeBuddy() {
+  const g = growth();
+  setChara($('#home-chara'), g.shown, 'normal');
+  $('#chara-name').textContent = state.charaName;
+  $('#chara-level').textContent = g.shown;
+  $('#chara-stage').textContent = STAGES[g.shown].name;
+  const pct = Math.floor(g.rate * 100);
+  const inStage = g.shown >= MAX_STAGE ? 1 : (g.rate * 10) - g.shown;
+  $('#growth-bar').style.width = `${Math.max(0, Math.min(100, inStage * 100))}%`;
+  $('#growth-text').textContent = g.shown >= MAX_STAGE
+    ? `習得率 ${pct}%（${g.solved} / ${g.total}問）さいこうの すがた！`
+    : `習得率 ${pct}%（${g.solved} / ${g.total}問）・つぎの進化まで あと${g.toNext}問`;
+  $('#dex').replaceChildren(
+    ...STAGES.map((st, i) => el('span', {
+      class: `dex-item${i > g.shown ? ' locked' : ''}${i === g.shown ? ' current' : ''}`,
+      title: i > g.shown ? '？？？' : `Lv.${i} ${st.name}`,
+      innerHTML: charaSVG(i, 'normal'),
+    })),
+  );
+}
+
+function buddyReact(kind) {
+  const stage = growth().shown;
+  const mood = kind === 'happy' ? 'happy' : kind === 'sad' ? 'sad' : 'cheer';
+  setChara($('#buddy-chara'), stage, mood);
+  say($('#buddy-bubble'), line(kind, stage), kind === 'cheer' ? 2500 : 0);
+}
+
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let evolving = false;
+
+async function checkEvolution() {
+  const { stage } = growth();
+  if (evolving || stage <= state.stageSeen) return;
+  evolving = true;
+  const from = state.stageSeen;
+  const overlay = $('#evolve');
+  const chara = $('#evolve-chara');
+  const ok = $('#evolve-ok');
+  overlay.className = 'evolve';
+  overlay.hidden = false;
+  ok.hidden = true;
+  $('#confetti').replaceChildren();
+  $('#evolve-title').textContent = `おや…？ ${state.charaName}のようすが…！`;
+  $('#evolve-msg').textContent = '';
+  setChara(chara, from, 'normal');
+
+  const fast = reducedMotion();
+  if (!fast) {
+    await wait(900);
+    overlay.classList.add('flashing');
+    for (let i = 0; i < 6; i++) { sound.flash(); await wait(380 - i * 40); }
+    await wait(300);
+  }
+  overlay.classList.remove('flashing');
+  overlay.classList.add('burst');
+  setChara(chara, stage, 'happy');
+  chara.classList.add('evolve-chara');
+  sound.evolve();
+  if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
+  if (!fast) spawnConfetti();
+  $('#evolve-title').textContent = '🎉 しんかした！ 🎉';
+  $('#evolve-msg').textContent = `${state.charaName}は Lv.${stage}「${STAGES[stage].name}」になった！`;
+  state.stageSeen = stage;
+  saveState(state);
+  await wait(fast ? 0 : 900);
+  ok.hidden = false;
+  ok.focus();
+  await new Promise((r) => { ok.onclick = r; });
+  overlay.hidden = true;
+  evolving = false;
+  renderHomeBuddy();
+  if (!$('#buddy').hidden) buddyReact('happy');
+}
+
+function spawnConfetti() {
+  const colors = ['#ff9f1c', '#3a86ff', '#2bb673', '#e8505b', '#8338ec', '#ffd23f'];
+  $('#confetti').replaceChildren(
+    ...Array.from({ length: 60 }, () => el('i', {
+      style: `left:${Math.random() * 100}%;background:${colors[Math.floor(Math.random() * colors.length)]};`
+        + `animation-delay:${(Math.random() * 0.6).toFixed(2)}s;animation-duration:${(1.8 + Math.random() * 1.4).toFixed(2)}s;`
+        + `transform:rotate(${Math.floor(Math.random() * 360)}deg)`,
+    })),
+  );
 }
 
 // ---------- ユーティリティ ----------
@@ -140,6 +264,7 @@ function startQuiz(mode, cat) {
       return { ...q, shuffled: order.map((i) => q.choices[i]), correctIndex: order.indexOf(q.answer) };
     });
   session = { mode, cat, questions, index: 0, results: [] };
+  session.solvedBefore = growth().solved;
   $('.progress').setAttribute('aria-valuemax', String(questions.length));
   show('quiz');
   renderQuestion();
@@ -170,6 +295,7 @@ function renderQuestion() {
   );
 
   $('#feedback').hidden = true;
+  buddyReact('cheer');
 }
 
 function answer(chosen) {
@@ -187,7 +313,10 @@ function answer(chosen) {
   // ふくしゅうリストの更新：まちがえたら追加、正解したら外す
   state.mistakes = state.mistakes.filter((id) => id !== q.id);
   if (!ok) state.mistakes.push(q.id);
+  // キャラの成長：5教科で初めて正解した問題を記録
+  if (ok && GROWTH_IDS.has(q.id) && !state.solved.includes(q.id)) state.solved.push(q.id);
   saveState(state);
+  buddyReact(ok ? 'happy' : 'sad');
 
   ok ? sound.correct() : sound.wrong();
   if (!ok && navigator.vibrate) navigator.vibrate(120);
@@ -257,8 +386,16 @@ function showResult() {
     ),
   );
 
+  const g = growth();
+  const gained = g.solved - session.solvedBefore;
+  $('#result-growth').textContent = GROWTH_MODES.includes(mode)
+    ? `🌱 ${state.charaName}の習得率 ${Math.floor(g.rate * 100)}%（あたらしく正解 +${gained}問）`
+    : '';
+
   if (rate >= 0.7) sound.fanfare();
   show('result');
+  setChara($('#buddy-chara'), g.shown, rate >= 0.7 ? 'happy' : rate >= 0.4 ? 'cheer' : 'sad');
+  say($('#buddy-bubble'), rate === 1 ? 'かんぺき！！' : rate >= 0.7 ? 'よくがんばったね！' : rate >= 0.4 ? 'つぎもいっしょにがんばろう！' : 'ふくしゅうしよう！');
 }
 
 // ---------- イベント ----------
@@ -288,6 +425,25 @@ soundBtn.addEventListener('click', () => {
 renderSoundBtn();
 
 $('#grade-label').textContent = `${CURRENT_GRADE}年生`;
+
+$('#home-buddy').addEventListener('click', () => {
+  const chara = $('#home-chara');
+  const stage = growth().shown;
+  setChara(chara, stage, 'happy');
+  say($('#home-bubble'), line('happy', stage), 1600);
+  clearTimeout(chara._timer);
+  chara._timer = setTimeout(() => setChara(chara, stage, 'normal'), 1600);
+});
+$('#rename-btn').addEventListener('click', () => {
+  const name = prompt('キャラクターの なまえを入れてね（8文字まで）', state.charaName);
+  if (name == null) return;
+  const trimmed = name.trim().slice(0, 8);
+  if (!trimmed) return;
+  state.charaName = trimmed;
+  saveState(state);
+  renderHomeBuddy();
+});
+show('home');
 
 // ---------- PWA ----------
 let deferredPrompt = null;

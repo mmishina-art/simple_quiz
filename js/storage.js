@@ -4,6 +4,9 @@ const defaults = () => ({
   sound: true,
   best: {}, // { "school:sansu": 9, ... }
   mistakes: [], // まちがえた問題のID（ふくしゅう用）
+  solved: [], // 5教科で一度でも正解した問題のID（キャラの成長用）
+  stageSeen: 0, // 進化の演出を見せたところまでの段階
+  charaName: 'ピコ',
 });
 
 export function loadState() {

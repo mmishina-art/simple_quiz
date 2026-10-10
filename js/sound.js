@@ -40,6 +40,13 @@ export function createSound(isEnabled) {
       tone(220, 0, 0.18, 'square', 0.08);
       tone(185, 0.16, 0.3, 'square', 0.08);
     }),
+    flash: play(() => {
+      tone(660, 0, 0.08, 'sine', 0.12);
+    }),
+    evolve: play(() => {
+      [523.3, 659.3, 784, 1046.5, 1318.5, 1568].forEach((f, i) => tone(f, i * 0.1, 0.4, 'triangle', 0.14));
+      tone(2093, 0.65, 0.8, 'sine', 0.1);
+    }),
     fanfare: play(() => {
       [523.3, 659.3, 784, 1046.5].forEach((f, i) => tone(f, i * 0.12, 0.35, 'triangle', 0.15));
     }),

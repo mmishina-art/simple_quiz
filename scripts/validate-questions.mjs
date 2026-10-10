@@ -43,9 +43,9 @@ check('english', englishCategories, englishQuestions, { needsGrade: false });
 
 // Service Worker のキャッシュ一覧に、データファイルがもれなく入っているか
 const sw = readFileSync(new URL('../sw.js', import.meta.url), 'utf8');
-for (const dir of ['', 'school/', 'trivia/', 'english/']) {
-  for (const f of readdirSync(new URL(`../js/data/${dir}`, import.meta.url))) {
-    if (f.endsWith('.js') && !sw.includes(`'./js/data/${dir}${f}'`)) errors.push(`sw.js の APP_SHELL に ./js/data/${dir}${f} がありません`);
+for (const dir of ['', 'data/', 'data/school/', 'data/trivia/', 'data/english/']) {
+  for (const f of readdirSync(new URL(`../js/${dir}`, import.meta.url))) {
+    if (f.endsWith('.js') && !sw.includes(`'./js/${dir}${f}'`)) errors.push(`sw.js の APP_SHELL に ./js/${dir}${f} がありません`);
   }
 }
 
