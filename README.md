@@ -26,7 +26,12 @@ npm start            # = python3 -m http.server 8080
 # → http://localhost:8080 を開く
 ```
 
-公開するときは、このフォルダをそのまま GitHub Pages などの静的ホスティングに置けば動きます（相対パスで書いてあるのでサブディレクトリでもOK）。
+### GitHub Pages で公開
+
+`.github/workflows/pages.yml` が、push のたびに問題データをチェックしてから GitHub Pages へ自動で公開します。
+
+初回だけ、リポジトリの **Settings → Pages → Build and deployment → Source** を **GitHub Actions** にしてください。
+公開URL: https://mmishina-art.github.io/simple_quiz/
 
 ## 問題の追加
 
