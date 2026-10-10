@@ -421,13 +421,15 @@ button {
 /* クイズ中のキャラ（問題カードの右がわ。ボタンや解説とは重ならない） */
 .question-card {
   display: grid;
-  grid-template-columns: 1fr 84px;
+  grid-template-columns: 1fr 96px;
   gap: 8px;
   align-items: start;
 }
 .question-main { min-width: 0; }
-.quiz-buddy { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.quiz-buddy .chara { width: 76px; height: 76px; }
+/* キャラの場所は大きさを固定。ふきだしはその中にうかせるので、
+   セリフが何行になっても・消えても・文字が大きい端末でも、まわりは動かない */
+.quiz-buddy { position: relative; height: 150px; }
+.quiz-buddy .chara { width: 76px; height: 76px; margin: 0 auto; }
 .quiz-buddy .bubble, .result-buddy .bubble {
   position: relative;
   max-width: 100%;
@@ -437,15 +439,32 @@ button {
   text-align: center;
   transform-origin: top center;
 }
-/* ふきだしの高さを固定（セリフの長さが変わっても、消えても、まわりが動かない） */
 .quiz-buddy .bubble {
-  box-sizing: border-box;
-  width: 100%;
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: absolute;
+  top: 84px;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  line-break: strict; /* 小さい「っ」などが行のはじめに来ないように */
+  /* 文字が大きい端末でもキャラの場所からはみ出さないよう、最大3行まで */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  max-height: 64px;
   overflow: hidden;
+}
+/* ふきだしの三角（ふきだしを切りぬいても消えないよう、外側に描く） */
+.quiz-buddy .bubble::before { content: none; }
+.quiz-buddy:has(.bubble:not(.quiet))::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 78px;
+  margin-left: -6px;
+  border: 6px solid transparent;
+  border-top: 0;
+  border-bottom-color: var(--border);
 }
 .quiz-buddy .bubble::before, .result-buddy .bubble::before {
   content: '';
