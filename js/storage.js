@@ -7,6 +7,7 @@ const defaults = () => ({
   solved: [], // 5教科で一度でも正解した問題のID（キャラの成長用）
   stageSeen: 0, // 進化の演出を見せたところまでの段階
   charaName: 'ピコ',
+  evolveSound: 'fanfare', // 進化のときのジングル（js/jingles.js）
 });
 
 export function loadState() {

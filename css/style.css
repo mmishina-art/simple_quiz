@@ -604,6 +604,9 @@ button {
 }
 .debug-btn:active { transform: scale(0.94); }
 .debug-btn.on { border-color: #8338ec; background: #8338ec; color: #fff; }
+.debug-jingles { display: grid; gap: 6px; }
+.debug-jingle { display: flex; align-items: center; gap: 6px; }
+.debug-desc { color: var(--muted); font-size: 12px; }
 .debug-btn.danger { border-color: var(--wrong); color: var(--wrong); }
 
 [hidden] { display: none !important; }

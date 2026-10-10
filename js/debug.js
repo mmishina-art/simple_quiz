@@ -2,6 +2,7 @@
 //   オン：URL に ?debug をつけて開く ／ タイトル「4たくクイズ」を7回つづけてタップ
 //   オフ：もう一度タイトルを7回タップ ／ ?debug=0 をつけて開く
 import { STAGES, MAX_STAGE, THRESHOLDS } from './chara.js';
+import { JINGLES } from './jingles.js';
 
 const KEY = 'simple-quiz:debug';
 const MOODS = [['normal', 'ふつう'], ['happy', 'よろこぶ'], ['sad', 'かなしむ'], ['cheer', 'おうえん']];
@@ -140,8 +141,32 @@ export function initDebug(app) {
       }, 'danger'),
     );
 
+    // 4. 進化の音をえらぶ（▶で試し聞き、名前をおすと決定）
+    const jingles = document.createElement('div');
+    jingles.className = 'debug-jingles';
+    for (const j of JINGLES) {
+      const line = document.createElement('div');
+      line.className = 'debug-jingle';
+      const chosen = app.state.evolveSound === j.id;
+      line.append(
+        btn('▶', () => app.sound.evolve(j.id)),
+        btn(`${chosen ? '✅ ' : ''}${j.name}`, () => {
+          app.state.evolveSound = j.id;
+          app.saveState(app.state);
+          app.sound.evolve(j.id);
+          render();
+        }, chosen ? 'on' : ''),
+      );
+      const d = document.createElement('span');
+      d.className = 'debug-desc';
+      d.textContent = j.desc;
+      line.append(d);
+      jingles.append(line);
+    }
+
     panel.append(
       head,
+      row('進化の音をえらぶ（▶で試し聞き・名前をおすと決定）', jingles),
       row('すがたを見る（記録は変わりません）', stages, moods),
       row('進化の演出を見る（記録は変わりません）', evos),
       row('成長を進める（⚠️ 記録が変わります）', grow),
