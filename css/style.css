@@ -15,16 +15,9 @@
   --radius: 18px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #1d1b22;
-    --surface: #2a2731;
-    --text: #f3eff7;
-    --muted: #b3acbd;
-    --border: #3d3946;
-    --shadow: 0 4px 0 rgba(0, 0, 0, 0.35);
-  }
-}
+/* スマホの「ダークモード」設定に関係なく、いつもクリーム色の明るい画面にする */
+:root { color-scheme: light only; }
+html { background: #fff8ec; }
 
 * { box-sizing: border-box; }
 
