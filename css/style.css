@@ -7,6 +7,7 @@
   --primary-dark: #e2850a;
   --school: #3a86ff;
   --trivia: #8338ec;
+  --english: #2a9d8f;
   --correct: #2bb673;
   --wrong: #e8505b;
   --border: #eadfcd;
@@ -110,6 +111,7 @@ button {
 .mode-card:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0, 0, 0, 0.18); }
 .mode-school { background: var(--school); }
 .mode-trivia { background: var(--trivia); }
+.mode-english { background: var(--english); }
 .mode-emoji { font-size: 44px; line-height: 1; }
 .mode-text strong { display: block; font-size: 22px; }
 .mode-text small { opacity: 0.9; font-size: 14px; }
@@ -223,7 +225,7 @@ button {
   color: #fff;
   background: var(--tag-color, var(--primary));
 }
-.question-text { margin: 0; font-size: 21px; font-weight: bold; line-height: 1.6; }
+.question-text { margin: 0; font-size: 21px; font-weight: bold; line-height: 1.6; white-space: pre-wrap; }
 
 .choices { display: grid; gap: 10px; }
 .choice-btn {
@@ -330,7 +332,7 @@ button {
   font-size: 15px;
 }
 .result-list li.ng { border-left-color: var(--wrong); }
-.result-list .rq { font-weight: bold; margin-bottom: 2px; }
+.result-list .rq { font-weight: bold; margin-bottom: 2px; white-space: pre-wrap; }
 .result-list .ra { color: var(--muted); }
 .result-list .ra b { color: var(--text); }
 

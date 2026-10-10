@@ -1,5 +1,6 @@
 import { schoolSubjects, schoolQuestions } from './data/school.js';
 import { triviaCategories, triviaQuestions } from './data/trivia.js';
+import { englishCategories, englishQuestions } from './data/english.js';
 import { createSound } from './sound.js';
 import { loadState, saveState } from './storage.js';
 
@@ -20,6 +21,11 @@ const MODES = {
     title: 'ざつがくモード',
     categories: triviaCategories,
     questions: Object.fromEntries(Object.entries(triviaQuestions).map(([cat, list]) => [cat, withIds('trivia', cat, list)])),
+  },
+  english: {
+    title: 'えいごモード',
+    categories: englishCategories,
+    questions: Object.fromEntries(Object.entries(englishQuestions).map(([cat, list]) => [cat, withIds('english', cat, list)])),
   },
 };
 

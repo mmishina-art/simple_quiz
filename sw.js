@@ -1,5 +1,5 @@
 // アプリのファイルを変更したら CACHE_VERSION を上げてください（利用者に更新が届きます）。
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const CACHE_NAME = `simple-quiz-${CACHE_VERSION}`;
 
 const APP_SHELL = [
@@ -10,8 +10,20 @@ const APP_SHELL = [
   './js/app.js',
   './js/storage.js',
   './js/sound.js',
+  './js/data/helpers.js',
   './js/data/school.js',
+  './js/data/school/kokugo.js',
+  './js/data/school/sansu.js',
+  './js/data/school/rika.js',
+  './js/data/school/shakai.js',
   './js/data/trivia.js',
+  './js/data/trivia/ikimono.js',
+  './js/data/trivia/sekai.js',
+  './js/data/trivia/kurashi.js',
+  './js/data/trivia/sports.js',
+  './js/data/english.js',
+  './js/data/english/eiken5.js',
+  './js/data/english/eiken4.js',
   './icons/icon.svg',
   './icons/icon-192.png',
   './icons/icon-512.png',
