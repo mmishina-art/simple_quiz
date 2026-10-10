@@ -3,7 +3,7 @@ import { triviaCategories, triviaQuestions } from './data/trivia.js';
 import { englishCategories, englishQuestions } from './data/english.js';
 import { createSound } from './sound.js';
 import { loadState, saveState } from './storage.js';
-import { charaSVG, line, stageFor, STAGES, MAX_STAGE } from './chara.js';
+import { charaSVG, line, stageFor, STAGES, MAX_STAGE, THRESHOLDS } from './chara.js';
 
 const ROUND_SIZE = 10;
 const CURRENT_GRADE = 5; // ひとまず5年生向け。学年を増やすときはここを設定画面から変えられるようにする。
@@ -58,8 +58,6 @@ const screens = {
 function show(name) {
   for (const [key, el] of Object.entries(screens)) el.classList.toggle('active', key === name);
   window.scrollTo(0, 0);
-  // クイズ中と結果画面では、画面のはしにキャラが出てくる
-  $('#buddy').hidden = !(name === 'quiz' || name === 'result');
   if (name === 'home') renderHomeBuddy();
   if (name !== 'quiz') checkEvolution();
 }
@@ -71,7 +69,7 @@ function growth() {
   const stage = stageFor(solved / total);
   // 表示する段階は、進化の演出を見せたところまで（問題が増えて割合が下がっても退化はしない）
   const shown = state.stageSeen;
-  const nextAt = shown >= MAX_STAGE ? null : Math.ceil((total * (shown + 1)) / 10);
+  const nextAt = shown >= MAX_STAGE ? null : Math.ceil((total * THRESHOLDS[shown + 1]) / 100 - 1e-9);
   return { solved, total, stage, shown, rate: solved / total, toNext: nextAt == null ? 0 : Math.max(0, nextAt - solved) };
 }
 
@@ -99,7 +97,8 @@ function renderHomeBuddy() {
   $('#chara-level').textContent = g.shown;
   $('#chara-stage').textContent = STAGES[g.shown].name;
   const pct = Math.floor(g.rate * 100);
-  const inStage = g.shown >= MAX_STAGE ? 1 : (g.rate * 10) - g.shown;
+  const inStage = g.shown >= MAX_STAGE ? 1
+    : (g.rate * 100 - THRESHOLDS[g.shown]) / (THRESHOLDS[g.shown + 1] - THRESHOLDS[g.shown]);
   $('#growth-bar').style.width = `${Math.max(0, Math.min(100, inStage * 100))}%`;
   $('#growth-text').textContent = g.shown >= MAX_STAGE
     ? `習得率 ${pct}%（${g.solved} / ${g.total}問）さいこうの すがた！`
@@ -165,7 +164,7 @@ async function checkEvolution() {
   overlay.hidden = true;
   evolving = false;
   renderHomeBuddy();
-  if (!$('#buddy').hidden) buddyReact('happy');
+  if (screens.result.classList.contains('active')) setChara($('#result-chara'), state.stageSeen, 'happy');
 }
 
 function spawnConfetti() {
@@ -394,11 +393,20 @@ function showResult() {
 
   if (rate >= 0.7) sound.fanfare();
   show('result');
-  setChara($('#buddy-chara'), g.shown, rate >= 0.7 ? 'happy' : rate >= 0.4 ? 'cheer' : 'sad');
-  say($('#buddy-bubble'), rate === 1 ? 'かんぺき！！' : rate >= 0.7 ? 'よくがんばったね！' : rate >= 0.4 ? 'つぎもいっしょにがんばろう！' : 'ふくしゅうしよう！');
+  setChara($('#result-chara'), g.shown, rate >= 0.7 ? 'happy' : rate >= 0.4 ? 'cheer' : 'sad');
+  say($('#result-bubble'), rate === 1 ? 'かんぺき！！' : rate >= 0.7 ? 'よくがんばったね！' : rate >= 0.4 ? 'つぎもいっしょにがんばろう！' : 'ふくしゅうしよう！');
 }
 
 // ---------- イベント ----------
+// どのボタンを押しても音が出るようにする（答えのボタンは正解・不正解の音が出るので除く）
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('button');
+  if (!btn || btn.disabled || btn.classList.contains('choice-btn')) return;
+  if (btn.id === 'home-buddy') sound.boing();
+  else if (btn.classList.contains('back-btn') || btn.dataset.go === 'home') sound.back();
+  else sound.tap();
+}, true);
+
 document.querySelectorAll('[data-mode]').forEach((btn) => btn.addEventListener('click', () => openSelect(btn.dataset.mode)));
 document.querySelectorAll('[data-go="home"]').forEach((btn) => btn.addEventListener('click', () => show('home')));
 $('#next-btn').addEventListener('click', next);

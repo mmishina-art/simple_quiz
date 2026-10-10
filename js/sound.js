@@ -55,12 +55,13 @@ export function createSound(isEnabled) {
   });
   window.addEventListener('pageshow', unlock);
 
-  function tone(ac, freq, start, duration, type = 'sine', volume = 0.2) {
+  function tone(ac, freq, start, duration, type = 'sine', volume = 0.2, endFreq = null) {
     const t = ac.currentTime + 0.01 + start;
     const osc = ac.createOscillator();
     const gain = ac.createGain();
     osc.type = type;
     osc.frequency.setValueAtTime(freq, t);
+    if (endFreq) osc.frequency.exponentialRampToValueAtTime(endFreq, t + duration);
     gain.gain.setValueAtTime(volume, t);
     gain.gain.exponentialRampToValueAtTime(0.001, t + duration);
     osc.connect(gain).connect(ac.destination);
@@ -78,6 +79,17 @@ export function createSound(isEnabled) {
   };
 
   return {
+    // ボタンを押したときの音
+    tap: play((ac) => {
+      tone(ac, 1100, 0, 0.07, 'sine', 0.14, 1500);
+    }),
+    back: play((ac) => {
+      tone(ac, 700, 0, 0.09, 'sine', 0.14, 420);
+    }),
+    boing: play((ac) => {
+      tone(ac, 380, 0, 0.18, 'triangle', 0.18, 900);
+      tone(ac, 900, 0.14, 0.12, 'triangle', 0.1, 650);
+    }),
     correct: play((ac) => {
       tone(ac, 880, 0, 0.15, 'triangle');
       tone(ac, 1318.5, 0.12, 0.3, 'triangle');

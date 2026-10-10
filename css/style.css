@@ -417,23 +417,40 @@ button {
 .dex-item.current { background: color-mix(in srgb, var(--primary) 22%, transparent); }
 .buddy-hint { grid-column: 1 / -1; margin: 2px 0 0; font-size: 11px; color: var(--muted); text-align: center; }
 
-/* クイズ中のキャラ（画面の右下） */
-.buddy {
-  position: fixed;
-  right: max(8px, env(safe-area-inset-right));
-  bottom: max(8px, env(safe-area-inset-bottom));
-  width: 84px;
-  height: 84px;
-  z-index: 20;
-  pointer-events: none;
+/* クイズ中のキャラ（問題カードの右がわ。ボタンや解説とは重ならない） */
+.question-card {
+  display: grid;
+  grid-template-columns: 1fr 84px;
+  gap: 8px;
+  align-items: start;
 }
-.buddy .chara { width: 84px; height: 84px; filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.18)); }
-.buddy .bubble { right: 70px; bottom: 58px; transform-origin: bottom right; }
-#screen-quiz.active, #screen-result.active { padding-bottom: 110px; }
-@media (min-width: 720px) {
-  .buddy { right: calc(50% - 360px); width: 110px; height: 110px; }
-  .buddy .chara { width: 110px; height: 110px; }
+.question-main { min-width: 0; }
+.quiz-buddy { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.quiz-buddy .chara { width: 76px; height: 76px; }
+.quiz-buddy .bubble, .result-buddy .bubble {
+  position: relative;
+  max-width: 100%;
+  padding: 4px 6px;
+  font-size: 12px;
+  white-space: normal;
+  text-align: center;
+  transform-origin: top center;
 }
+.quiz-buddy .bubble::before, .result-buddy .bubble::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -7px;
+  margin-left: -6px;
+  border: 6px solid transparent;
+  border-top: 0;
+  border-bottom-color: var(--border);
+}
+
+/* 結果画面のキャラ（けっかカードの中） */
+.result-buddy { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-bottom: 4px; }
+.result-buddy .chara { width: 96px; height: 96px; }
+.result-buddy .bubble { max-width: 260px; font-size: 14px; }
 
 .result-growth { margin: 6px 0 0; font-size: 14px; font-weight: bold; color: #2bb673; }
 
@@ -516,6 +533,14 @@ button {
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
 .toast .chip { color: var(--text); }
+
+/* 押したときに少しへこむ（すべてのボタン共通） */
+.chip, .back-btn, .icon-btn, .review-btn, .secondary-btn, .home-buddy {
+  transition: transform 0.1s;
+}
+.chip:active, .back-btn:active, .icon-btn:active, .review-btn:active, .secondary-btn:active, .home-buddy:active {
+  transform: scale(0.92);
+}
 
 [hidden] { display: none !important; }
 

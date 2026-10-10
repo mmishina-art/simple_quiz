@@ -1,4 +1,4 @@
-// 育成キャラクター。習得率（5教科で一度でも正解した問題の割合）10%ごとに進化します。
+// 育成キャラクター。習得率（5教科で一度でも正解した問題の割合）に応じて進化します。
 // 絵はすべて SVG で描いているので、画像ファイルは不要です。
 
 export const STAGES = [
@@ -17,9 +17,15 @@ export const STAGES = [
 
 export const MAX_STAGE = STAGES.length - 1;
 
+// 各段階に進化するのに必要な習得率（%）。
+// 最初は少しの正解で進化し、だんだん次の進化までが長くなります。
+export const THRESHOLDS = [0, 2, 5, 9, 15, 23, 33, 45, 60, 78, 100];
+
 // 習得率（0〜1）から段階（0〜10）を求める
 export function stageFor(rate) {
-  return Math.min(MAX_STAGE, Math.floor(rate * 10 + 1e-9));
+  let stage = 0;
+  THRESHOLDS.forEach((t, i) => { if (rate * 100 + 1e-9 >= t) stage = i; });
+  return stage;
 }
 
 const INK = '#3a3340';

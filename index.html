@@ -90,8 +90,15 @@
       </div>
 
       <div class="question-card">
-        <p id="question-tag" class="question-tag"></p>
-        <p id="question-text" class="question-text"></p>
+        <div class="question-main">
+          <p id="question-tag" class="question-tag"></p>
+          <p id="question-text" class="question-text"></p>
+        </div>
+        <!-- 応えんしてくれるキャラ（問題の右がわ） -->
+        <div class="quiz-buddy">
+          <span id="buddy-chara" class="chara mood-cheer"></span>
+          <span id="buddy-bubble" class="bubble" hidden></span>
+        </div>
       </div>
 
       <div id="choices" class="choices"></div>
@@ -106,6 +113,10 @@
     <!-- 結果 -->
     <section id="screen-result" class="screen">
       <div class="result-card">
+        <div class="result-buddy">
+          <span id="result-chara" class="chara mood-normal"></span>
+          <span id="result-bubble" class="bubble"></span>
+        </div>
         <p class="result-label">けっか</p>
         <p class="result-score"><span id="result-correct">0</span><small> / <span id="result-total">0</span> もん</small></p>
         <p id="result-stars" class="result-stars" aria-hidden="true"></p>
@@ -123,12 +134,6 @@
       <ol id="result-list" class="result-list"></ol>
     </section>
   </main>
-
-  <!-- クイズ中に画面のはしで応えんしてくれるキャラ -->
-  <div id="buddy" class="buddy" hidden>
-    <span id="buddy-bubble" class="bubble" hidden></span>
-    <span id="buddy-chara" class="chara mood-cheer"></span>
-  </div>
 
   <!-- 進化の演出 -->
   <div id="evolve" class="evolve" hidden>
