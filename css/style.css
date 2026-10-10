@@ -609,6 +609,20 @@ button {
 .debug-desc { color: var(--muted); font-size: 12px; }
 .debug-btn.danger { border-color: var(--wrong); color: var(--wrong); }
 
+.boot-error {
+  position: fixed;
+  inset: auto 16px max(16px, env(safe-area-inset-bottom));
+  z-index: 100;
+  padding: 16px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 3px solid var(--wrong);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  text-align: center;
+}
+.boot-error p { margin: 0 0 10px; font-weight: bold; }
+.boot-error .boot-note { margin: 8px 0 0; font-size: 12px; font-weight: normal; color: var(--muted); }
+
 [hidden] { display: none !important; }
 
 @media (prefers-reduced-motion: reduce) {

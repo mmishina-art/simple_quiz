@@ -484,29 +484,7 @@ $('#install-btn').addEventListener('click', async () => {
   $('#install-btn').hidden = true;
 });
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', async () => {
-    try {
-      const reg = await navigator.serviceWorker.register('sw.js');
-      const promptUpdate = (worker) => {
-        $('#update-toast').hidden = false;
-        $('#update-btn').onclick = () => worker.postMessage('skipWaiting');
-      };
-      if (reg.waiting && navigator.serviceWorker.controller) promptUpdate(reg.waiting);
-      reg.addEventListener('updatefound', () => {
-        const worker = reg.installing;
-        worker?.addEventListener('statechange', () => {
-          if (worker.state === 'installed' && navigator.serviceWorker.controller) promptUpdate(worker);
-        });
-      });
-      let reloaded = false;
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (reloaded) return;
-        reloaded = true;
-        location.reload();
-      });
-    } catch (err) {
-      console.warn('Service worker registration failed:', err);
-    }
-  });
-}
+// Service Worker の登録と更新のお知らせは js/boot.js で行います（app.js が動かなくても更新できるように）
+
+// ここまで来たら起動成功（js/boot.js が見ています）
+window.__appStarted = true;

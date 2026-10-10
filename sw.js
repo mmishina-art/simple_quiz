@@ -1,5 +1,5 @@
 // アプリのファイルを変更したら CACHE_VERSION を上げてください（利用者に更新が届きます）。
-const CACHE_VERSION = 'v14';
+const CACHE_VERSION = 'v15';
 const CACHE_NAME = `simple-quiz-${CACHE_VERSION}`;
 
 const APP_SHELL = [
@@ -7,6 +7,7 @@ const APP_SHELL = [
   './index.html',
   './manifest.webmanifest',
   './css/style.css',
+  './js/boot.js',
   './js/app.js',
   './js/storage.js',
   './js/sound.js',
@@ -35,7 +36,14 @@ const APP_SHELL = [
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)));
+  // cache: 'reload' で、ブラウザに残っている古いファイルを使わず、必ずサーバーから新しく取ってくる
+  // （古いファイルと新しいファイルがまざると、アプリが起動できなくなるため）
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(APP_SHELL.map((url) => new Request(url, { cache: 'reload' }))))
+      // すぐに新しいバージョンを使えるようにする（アプリが動かなくなっていても、開き直せば新しくなる）
+      .then(() => self.skipWaiting()),
+  );
 });
 
 self.addEventListener('activate', (event) => {
