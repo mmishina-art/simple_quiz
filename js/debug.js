@@ -2,7 +2,7 @@
 //   オン：URL に ?debug をつけて開く ／ タイトル「4たくクイズ」を7回つづけてタップ
 //   オフ：もう一度タイトルを7回タップ ／ ?debug=0 をつけて開く
 import { STAGES, MAX_STAGE, THRESHOLDS } from './chara.js';
-import { JINGLES } from './jingles.js';
+import { JINGLES, DEFAULT_JINGLE } from './jingles.js';
 
 const KEY = 'simple-quiz:debug';
 const MOODS = [['normal', 'ふつう'], ['happy', 'よろこぶ'], ['sad', 'かなしむ'], ['cheer', 'おうえん']];
@@ -147,11 +147,11 @@ export function initDebug(app) {
     for (const j of JINGLES) {
       const line = document.createElement('div');
       line.className = 'debug-jingle';
-      const chosen = app.state.evolveSound === j.id;
+      const chosen = (app.state.jingle ?? DEFAULT_JINGLE) === j.id;
       line.append(
         btn('▶', () => app.sound.evolve(j.id)),
         btn(`${chosen ? '✅ ' : ''}${j.name}`, () => {
-          app.state.evolveSound = j.id;
+          app.state.jingle = j.id;
           app.saveState(app.state);
           app.sound.evolve(j.id);
           render();

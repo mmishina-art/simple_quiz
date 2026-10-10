@@ -2,12 +2,12 @@
 // Web Audio API で、金管楽器・ベル・ドラム・ひびき（リバーブ）を作って鳴らします。
 
 export const JINGLES = [
+  { id: 'retro', name: 'レトロゲーム', desc: 'ファミコン風のクリア音（ふつうはこれ）' },
   { id: 'fanfare', name: 'ファンファーレ', desc: '金管の「タタタ・ターン！」' },
   { id: 'magic', name: 'キラキラ', desc: 'ヒュイーン→ベルがキラキラ' },
-  { id: 'retro', name: 'レトロゲーム', desc: 'ファミコン風のクリア音' },
   { id: 'jajan', name: 'ジャジャーン', desc: '短くはでな一発' },
 ];
-export const DEFAULT_JINGLE = 'fanfare';
+export const DEFAULT_JINGLE = 'retro';
 
 // 音の高さ（Hz）。n('C5') のように使う
 const NOTE = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };

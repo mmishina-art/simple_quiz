@@ -157,7 +157,7 @@ async function playEvolution(from, stage, { save }) {
   overlay.classList.add('burst');
   setChara(chara, stage, 'happy');
   chara.classList.add('evolve-chara');
-  sound.evolve(state.evolveSound);
+  sound.evolve(state.jingle);
   if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
   if (!fast) spawnConfetti();
   $('#evolve-title').textContent = '🎉 しんかした！ 🎉';

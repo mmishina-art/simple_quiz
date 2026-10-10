@@ -1,5 +1,5 @@
 // アプリのファイルを変更したら CACHE_VERSION を上げてください（利用者に更新が届きます）。
-const CACHE_VERSION = 'v12';
+const CACHE_VERSION = 'v13';
 const CACHE_NAME = `simple-quiz-${CACHE_VERSION}`;
 
 const APP_SHELL = [
