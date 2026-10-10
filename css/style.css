@@ -373,6 +373,7 @@ button {
   color: var(--text);
 }
 .bubble.pop { animation: pop 0.25s ease-out; }
+.bubble.quiet { visibility: hidden; }
 @keyframes pop { from { transform: scale(0.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
 .buddy-card {
@@ -435,6 +436,16 @@ button {
   white-space: normal;
   text-align: center;
   transform-origin: top center;
+}
+/* ふきだしの高さを固定（セリフの長さが変わっても、消えても、まわりが動かない） */
+.quiz-buddy .bubble {
+  box-sizing: border-box;
+  width: 100%;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 .quiz-buddy .bubble::before, .result-buddy .bubble::before {
   content: '';

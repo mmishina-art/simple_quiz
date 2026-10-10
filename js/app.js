@@ -80,14 +80,15 @@ function setChara(target, stage, mood) {
   void target.offsetWidth;
 }
 
+// ふきだしを出す。消すときは見えなくするだけで、場所は残す（レイアウトがずれないように）
 function say(bubble, text, ms = 0) {
   bubble.textContent = text;
-  bubble.hidden = false;
+  bubble.classList.remove('quiet');
   bubble.classList.remove('pop');
   void bubble.offsetWidth;
   bubble.classList.add('pop');
   clearTimeout(bubble._timer);
-  if (ms) bubble._timer = setTimeout(() => { bubble.hidden = true; }, ms);
+  if (ms) bubble._timer = setTimeout(() => bubble.classList.add('quiet'), ms);
 }
 
 function renderHomeBuddy() {
@@ -143,7 +144,7 @@ async function checkEvolution() {
   if (!fast) {
     await wait(900);
     overlay.classList.add('flashing');
-    for (let i = 0; i < 6; i++) { sound.flash(); await wait(380 - i * 40); }
+    for (let i = 0; i < 8; i++) { sound.flash(i); await wait(360 - i * 30); }
     await wait(300);
   }
   overlay.classList.remove('flashing');
