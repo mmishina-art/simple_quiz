@@ -1,4 +1,4 @@
-import { playJingle } from './jingles.js';
+import { playJingle, playBuildup, playFull } from './jingles.js';
 
 // 効果音は Web Audio API で作るので、音声ファイルは不要です。
 //
@@ -71,21 +71,6 @@ export function createSound(isEnabled) {
     osc.stop(t + duration + 0.02);
   }
 
-  // ファミコン風の音（音の長さの間は同じ大きさで鳴らし、最後だけすっと消す）
-  function chip(ac, freq, start, duration, type = 'square', volume = 0.08) {
-    const t = ac.currentTime + 0.01 + start;
-    const osc = ac.createOscillator();
-    const gain = ac.createGain();
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq, t);
-    gain.gain.setValueAtTime(volume, t);
-    gain.gain.setValueAtTime(volume, t + duration * 0.8);
-    gain.gain.linearRampToValueAtTime(0.0001, t + duration);
-    osc.connect(gain).connect(ac.destination);
-    osc.start(t);
-    osc.stop(t + duration + 0.02);
-  }
-
   // 音声が動いていることを確かめてから鳴らす
   const play = (fn) => () => {
     if (!isEnabled()) return;
@@ -115,10 +100,10 @@ export function createSound(isEnabled) {
       tone(ac, 220, 0, 0.18, 'square', 0.08);
       tone(ac, 185, 0.16, 0.3, 'square', 0.08);
     }),
-    // 進化中の点めつ。step が進むほど音が高くなり、期待がふくらむ
-    flash: (step = 0) => play((ac) => {
-      chip(ac, 440 * 2 ** (step / 4), 0, 0.07, 'square', 0.06);
-    })(),
+    // 進化中の点めつのあいだに流れる「ためる音」
+    buildup: (id) => play((ac) => playBuildup(ac, id))(),
+    // ためる音 → ジングル を通しで（試し聞き用）
+    evolveFull: (id) => play((ac) => playFull(ac, id))(),
     // 進化したときのジングル（js/jingles.js のどれか）
     evolve: (id) => play((ac) => playJingle(ac, id))(),
     fanfare: play((ac) => {

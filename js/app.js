@@ -5,6 +5,7 @@ import { createSound } from './sound.js';
 import { loadState, saveState } from './storage.js';
 import { charaSVG, line, stageFor, STAGES, MAX_STAGE, THRESHOLDS } from './chara.js';
 import { initDebug } from './debug.js';
+import { BUILDUP_SEC } from './jingles.js';
 
 const ROUND_SIZE = 10;
 const CURRENT_GRADE = 5; // ひとまず5年生向け。学年を増やすときはここを設定画面から変えられるようにする。
@@ -150,8 +151,8 @@ async function playEvolution(from, stage, { save }) {
   if (!fast) {
     await wait(900);
     overlay.classList.add('flashing');
-    for (let i = 0; i < 8; i++) { sound.flash(i); await wait(360 - i * 30); }
-    await wait(300);
+    sound.buildup(state.jingle);
+    await wait(BUILDUP_SEC * 1000);
   }
   overlay.classList.remove('flashing');
   overlay.classList.add('burst');

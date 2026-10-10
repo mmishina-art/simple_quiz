@@ -17,6 +17,9 @@ const n = (name) => {
   return 440 * 2 ** ((semis - 69) / 12);
 };
 
+// 次に鳴らす音を何秒あとにずらすか（playFull で使う）
+let delay = 0;
+
 // ---------- 音の通り道（コンプレッサー＋ひびき） ----------
 function impulse(ac, seconds, decay) {
   const len = Math.floor(ac.sampleRate * seconds);
@@ -60,7 +63,7 @@ function out(ac, node, send = 0.4) {
 // ---------- 楽器 ----------
 // 金管楽器（のこぎり波を2つ少しずらして重ね、フィルターで明るさを動かす）
 function brass(ac, t0, freq, dur, vol = 0.12, send = 0.35) {
-  const t = ac.currentTime + 0.02 + t0;
+  const t = ac.currentTime + 0.02 + delay + t0;
   const g = ac.createGain();
   g.gain.setValueAtTime(0.0001, t);
   g.gain.exponentialRampToValueAtTime(vol, t + 0.03);
@@ -87,7 +90,7 @@ function brass(ac, t0, freq, dur, vol = 0.12, send = 0.35) {
 
 // ベル（基音＋高い倍音、すぐに減衰）
 function bell(ac, t0, freq, dur = 1.2, vol = 0.08, send = 0.6) {
-  const t = ac.currentTime + 0.02 + t0;
+  const t = ac.currentTime + 0.02 + delay + t0;
   [[1, 1], [2.01, 0.35], [3.98, 0.12]].forEach(([mul, amp]) => {
     const o = ac.createOscillator();
     const g = ac.createGain();
@@ -104,7 +107,7 @@ function bell(ac, t0, freq, dur = 1.2, vol = 0.08, send = 0.6) {
 
 // やわらかいパッド（三角波をゆっくり大きく）
 function pad(ac, t0, freq, dur, vol = 0.05, send = 0.7) {
-  const t = ac.currentTime + 0.02 + t0;
+  const t = ac.currentTime + 0.02 + delay + t0;
   const o = ac.createOscillator();
   const g = ac.createGain();
   o.type = 'triangle';
@@ -120,7 +123,7 @@ function pad(ac, t0, freq, dur, vol = 0.05, send = 0.7) {
 
 // ファミコン風（矩形波・三角波）。vib を指定するとビブラート
 function chip(ac, t0, freq, dur, { type = 'square', vol = 0.06, vib = 0, send = 0.2 } = {}) {
-  const t = ac.currentTime + 0.02 + t0;
+  const t = ac.currentTime + 0.02 + delay + t0;
   const o = ac.createOscillator();
   const g = ac.createGain();
   o.type = type;
@@ -156,7 +159,7 @@ function noise(ac) {
 
 // ノイズ系の打楽器（スネア・シンバル）
 function hit(ac, t0, { dur = 0.15, vol = 0.15, freq = 2000, type = 'bandpass', send = 0.3 } = {}) {
-  const t = ac.currentTime + 0.02 + t0;
+  const t = ac.currentTime + 0.02 + delay + t0;
   const src = ac.createBufferSource();
   src.buffer = noise(ac);
   const f = ac.createBiquadFilter();
@@ -173,7 +176,7 @@ function hit(ac, t0, { dur = 0.15, vol = 0.15, freq = 2000, type = 'bandpass', s
 
 // 大だいこ・ティンパニ風
 function kick(ac, t0, { vol = 0.5, from = 140, to = 45, dur = 0.35 } = {}) {
-  const t = ac.currentTime + 0.02 + t0;
+  const t = ac.currentTime + 0.02 + delay + t0;
   const o = ac.createOscillator();
   const g = ac.createGain();
   o.type = 'sine';
@@ -187,12 +190,33 @@ function kick(ac, t0, { vol = 0.5, from = 140, to = 45, dur = 0.35 } = {}) {
   o.stop(t + dur + 0.05);
 }
 
+// フィルターを上げていくノイズ（ためる音）
+function riser(ac, t0, dur, { from = 300, to = 6000, vol = 0.08, send = 0.5 } = {}) {
+  const t = ac.currentTime + 0.02 + delay + t0;
+  const src = ac.createBufferSource();
+  src.buffer = noise(ac);
+  src.loop = true;
+  const f = ac.createBiquadFilter();
+  f.type = 'bandpass';
+  f.Q.value = 3;
+  f.frequency.setValueAtTime(from, t);
+  f.frequency.exponentialRampToValueAtTime(to, t + dur);
+  const g = ac.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol, t + dur * 0.95);
+  g.gain.linearRampToValueAtTime(0.0001, t + dur + 0.05);
+  src.connect(f).connect(g);
+  out(ac, g, send);
+  src.start(t);
+  src.stop(t + dur + 0.1);
+}
+
 const crash = (ac, t0, vol = 0.12) => hit(ac, t0, { dur: 1.6, vol, freq: 7000, type: 'highpass', send: 0.5 });
 const snare = (ac, t0, vol = 0.14) => hit(ac, t0, { dur: 0.12, vol, freq: 1800 });
 
 // ヒュイーンと上がる音
 function sweep(ac, t0, from, to, dur, vol = 0.05) {
-  const t = ac.currentTime + 0.02 + t0;
+  const t = ac.currentTime + 0.02 + delay + t0;
   const o = ac.createOscillator();
   const g = ac.createGain();
   o.type = 'sine';
@@ -275,6 +299,79 @@ const PLAY = {
   },
 };
 
+// ---------- ためる音（進化の点めつ中に流れる。どれもオリジナル） ----------
+// BUILDUP_SEC 秒で最高潮になり、そのあとジングルが鳴る
+export const BUILDUP_SEC = 2.35;
+
+const BUILD = {
+  // ピロピロピロ↑（ファミコン風。だんだん速く、高くなる）
+  retro(ac) {
+    let t = 0;
+    let i = 0;
+    while (t < BUILDUP_SEC - 0.05) {
+      const step = Math.floor(i / 2);
+      const f = n('C4') * 2 ** ((step * 1.15 + (i % 2 ? 4 : 0)) / 12);
+      const len = Math.max(0.035, 0.12 - t * 0.04);
+      chip(ac, t, f, len * 0.9, { vol: 0.05 + (t / BUILDUP_SEC) * 0.08, send: 0.15 });
+      t += len;
+      i++;
+    }
+    riser(ac, 0.6, BUILDUP_SEC - 0.6, { from: 500, to: 5000, vol: 0.18 });
+  },
+  // ティンパニとスネアのロール（だんだん大きく）
+  fanfare(ac) {
+    let t = 0;
+    while (t < BUILDUP_SEC - 0.05) {
+      const p = t / BUILDUP_SEC;
+      snare(ac, t, 0.05 + p * 0.22);
+      t += 0.07 - p * 0.03;
+    }
+    for (let k = 0; k < 9; k++) kick(ac, k * 0.26, { vol: 0.25 + k * 0.05, from: 110, to: 70, dur: 0.3 });
+    chord(pad, ac, 0.3, ['G3', 'D4', 'G4'], BUILDUP_SEC - 0.2, 0.09);
+  },
+  // シュワーッと上がって、キラキラがだんだんふえる
+  magic(ac) {
+    riser(ac, 0, BUILDUP_SEC, { from: 300, to: 8000, vol: 0.3, send: 0.7 });
+    sweep(ac, 0.2, 200, 1600, BUILDUP_SEC - 0.2, 0.16);
+    const sparkle = ['C6', 'E6', 'G6', 'A6', 'C7', 'D7', 'E7'];
+    let t = 0.2;
+    let k = 0;
+    while (t < BUILDUP_SEC - 0.1) {
+      bell(ac, t, n(sparkle[(k * 3) % sparkle.length]), 0.6, 0.07 + (t / BUILDUP_SEC) * 0.1, 0.8);
+      t += 0.3 - (t / BUILDUP_SEC) * 0.22;
+      k++;
+    }
+  },
+  // スネアロールがどんどん大きく
+  jajan(ac) {
+    let t = 0;
+    while (t < BUILDUP_SEC - 0.05) {
+      const p = t / BUILDUP_SEC;
+      hit(ac, t, { dur: 0.07, vol: 0.06 + p * p * 0.35, freq: 1200, type: 'highpass', send: 0.35 });
+      t += 0.05 - p * 0.015;
+    }
+    riser(ac, 0.8, BUILDUP_SEC - 0.8, { from: 400, to: 4000, vol: 0.16 });
+    sweep(ac, 0.4, 150, 900, BUILDUP_SEC - 0.4, 0.14);
+  },
+};
+
+const pick = (table, id) => table[id] ?? table[DEFAULT_JINGLE];
+
 export function playJingle(ac, id) {
-  (PLAY[id] ?? PLAY[DEFAULT_JINGLE])(ac);
+  delay = 0;
+  pick(PLAY, id)(ac);
+}
+
+export function playBuildup(ac, id) {
+  delay = 0;
+  pick(BUILD, id)(ac);
+}
+
+// ためる音 → ジングル を通しで鳴らす（試し聞き用）
+export function playFull(ac, id) {
+  delay = 0;
+  pick(BUILD, id)(ac);
+  delay = BUILDUP_SEC;
+  pick(PLAY, id)(ac);
+  delay = 0;
 }

@@ -149,11 +149,11 @@ export function initDebug(app) {
       line.className = 'debug-jingle';
       const chosen = (app.state.jingle ?? DEFAULT_JINGLE) === j.id;
       line.append(
-        btn('▶', () => app.sound.evolve(j.id)),
+        btn('▶', () => app.sound.evolveFull(j.id)),
         btn(`${chosen ? '✅ ' : ''}${j.name}`, () => {
           app.state.jingle = j.id;
           app.saveState(app.state);
-          app.sound.evolve(j.id);
+          app.sound.evolveFull(j.id);
           render();
         }, chosen ? 'on' : ''),
       );
@@ -166,7 +166,7 @@ export function initDebug(app) {
 
     panel.append(
       head,
-      row('進化の音をえらぶ（▶で試し聞き・名前をおすと決定）', jingles),
+      row('進化の音をえらぶ（▶で ためる音→ジングル を通しで試し聞き・名前をおすと決定）', jingles),
       row('すがたを見る（記録は変わりません）', stages, moods),
       row('進化の演出を見る（記録は変わりません）', evos),
       row('成長を進める（⚠️ 記録が変わります）', grow),
