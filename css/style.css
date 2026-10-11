@@ -1,5 +1,5 @@
 :root {
-  --bg: #fff8ec;
+  --bg: #fbe3c0; /* あんず色：白いカードがはっきりうかぶ */
   --surface: #ffffff;
   --text: #2d2a32;
   --muted: #6b6573;
@@ -10,14 +10,15 @@
   --english: #2a9d8f;
   --correct: #2bb673;
   --wrong: #e8505b;
-  --border: #eadfcd;
+  --border: #ecd2a8;
+  --card-edge: #efd6ad; /* 白いカードのふちどり */
   --shadow: 0 4px 0 rgba(0, 0, 0, 0.08);
   --radius: 18px;
 }
 
 /* スマホの「ダークモード」設定に関係なく、いつもクリーム色の明るい画面にする */
 :root { color-scheme: light only; }
-html { background: #fff8ec; }
+html { background: #fbe3c0; }
 
 * { box-sizing: border-box; }
 
@@ -615,6 +616,13 @@ button {
 }
 .boot-error p { margin: 0 0 10px; font-weight: bold; }
 .boot-error .boot-note { margin: 8px 0 0; font-size: 12px; font-weight: normal; color: var(--muted); }
+
+/* 白いカードにふちどりをつけて、背景との差をはっきりさせる */
+.question-card, .buddy-card, .result-card, .result-list li, .debug-panel .debug-btn {
+  border: 2px solid var(--card-edge);
+}
+.result-list li { border-left: 6px solid var(--correct); }
+.result-list li.ng { border-left-color: var(--wrong); }
 
 [hidden] { display: none !important; }
 
