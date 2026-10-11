@@ -40,8 +40,8 @@ const MODES = {
 const ALL = 'all';
 const REVIEW = 'review';
 
-// キャラの成長に数えるモード（5教科＝国語・算数・理科・社会・英語）
-const GROWTH_MODES = ['school', 'english'];
+// キャラの成長に数えるモード（国語・算数・理科・社会・ざつがく・英語のぜんぶ）
+const GROWTH_MODES = ['school', 'trivia', 'english'];
 const GROWTH_IDS = new Set(GROWTH_MODES.flatMap((m) => Object.values(MODES[m].questions).flat().map((q) => q.id)));
 
 function withIds(mode, cat, list) {
@@ -412,7 +412,7 @@ function answer(chosen) {
   // ふくしゅうリストの更新：まちがえたら追加、正解したら外す
   state.mistakes = state.mistakes.filter((id) => id !== q.id);
   if (!ok) state.mistakes.push(q.id);
-  // 一度でも正解した問題を記録（出題の優先順位に使う。キャラの成長は5教科の分だけ数える）
+  // 一度でも正解した問題を記録（出題の優先順位に使う。キャラの成長にも使う）
   if (ok && !state.solved.includes(q.id)) state.solved.push(q.id);
   saveState(state);
   buddyReact(ok ? 'happy' : 'sad');

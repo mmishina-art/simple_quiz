@@ -6,7 +6,7 @@ const defaults = () => ({
   sound: true,
   best: {}, // { "school:sansu": 9, ... }
   mistakes: [], // まちがえた問題のID（ふくしゅう用）
-  solved: [], // 5教科で一度でも正解した問題のID（キャラの成長用）
+  solved: [], // 一度でも正解した問題のID（キャラの成長・出題の優先順位用）
   stageSeen: 0, // 進化の演出を見せたところまでの段階
   charaName: 'ピコ',
   jingle: null, // 進化のときのジングル（null ならおすすめの「レトロゲーム」。js/jingles.js）

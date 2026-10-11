@@ -305,7 +305,7 @@ export function initBackup(app) {
       '',
       `・保存した日：${data.savedAt ? fmtDate(data.savedAt) : 'ふめい'}`,
       `・キャラ：${data.charaName ?? 'ピコ'}（Lv.${data.stageSeen}）`,
-      `・正解ずみ：${solved}問（5教科）`,
+      `・正解ずみ：${solved}問`,
       '',
       'いまの記録は消えずに、合わせた記録になります。',
     ];
@@ -345,7 +345,7 @@ export function initBackup(app) {
 
       el('section', { className: 'sheet-section' }, [
         el('h3', { textContent: '💾 バックアップ' }),
-        el('p', { className: 'sheet-note', textContent: `いまの記録：正解ずみ ${g.solved}問（5教科）・${state.charaName} Lv.${g.shown}` }),
+        el('p', { className: 'sheet-note', textContent: `いまの記録：正解ずみ ${g.solved}問・${state.charaName} Lv.${g.shown}` }),
         el('p', { className: 'sheet-note', textContent: state.lastBackupAt ? `最後のバックアップ：${fmtDate(state.lastBackupAt)}` : 'まだバックアップしていません' }),
         btn('ファイルで保存（共有）', saveFile, 'primary-btn'),
         btn('ひきつぎコードをコピー', copyCode),
