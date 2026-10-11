@@ -45,7 +45,7 @@ export default [
   Q('(   ) Ken play soccer? ― Yes, he does.　（ ）に入るのは？', ['Does', 'Do', 'Is', 'Are'], '主語が Ken（3人称・単数）なので Does を使います。'),
   Q('I (   ) have a pen.（わたしはペンを持っていません。）　（ ）に入るのは？', ["don't", "doesn't", "isn't", "aren't"], '一般動詞の否定文は、主語が I なら do not（don\'t）を使います。'),
   Q('This is (   ) bag.（これはわたしのかばんです。）　（ ）に入るのは？', ['my', 'I', 'me', 'mine'], '「わたしの〜」は my です。'),
-  Q('I know (   ).（わたしはかれを知っています。）　（ ）に入るのは？', ['him', 'he', 'his', 'her'], '「かれを」は him です。he = かれは、his = かれの です。'),
+  Q('I know (   ).（わたしはかれを知っています。）　（ ）に入るのは？', ['him', 'he', 'his', 'he\'s'], '「かれを」は him です。he = かれは、his = かれの、he\'s = he is（かれは〜です）です。'),
   Q('Whose bag is this? ― It\'s (   ).（わたしのものです。）　（ ）に入るのは？', ['mine', 'my', 'me', 'I'], '「わたしのもの」は mine です。'),
   Q('I have two (   ).　（ ）に入るのは？', ['books', 'book', 'a book', 'bookes'], '2つ以上のときは、名詞に s をつけて複数形にします。'),
 
@@ -60,11 +60,11 @@ export default [
   Q('(   ) much is this cap? ― It\'s 500 yen.　（ ）に入るのは？', ['How', 'What', 'Who', 'Where'], 'ねだんをたずねるときは How much を使います。'),
 
   // ---- can・進行形・命令文・前置詞 ----
-  Q('I (   ) swim well.（わたしはじょうずに泳げます。）　（ ）に入るのは？', ['can', 'am', 'do', 'is'], '「〜できる」は can を使います。can のあとの動詞は形を変えません。'),
+  Q('I (   ) swim well.（わたしはじょうずに泳げます。）　（ ）に入るのは？', ['can', 'am', 'does', 'is'], '「〜できる」は can を使います。can のあとの動詞は形を変えません。'),
   Q('Can you play the piano? ― No, I (   ).　（ ）に入るのは？', ["can't", "don't", "am not", "isn't"], 'Can you ～? には Yes, I can. / No, I can\'t. で答えます。'),
   Q('I am (   ) soccer now.（わたしは今サッカーをしています。）　（ ）に入るのは？', ['playing', 'play', 'plays', 'played'], '「今〜している」は be 動詞 + 動詞の ing 形で表します。'),
   Q('(   ) at this picture.（この絵を見て。）　（ ）に入るのは？', ['Look', 'Looks', 'Looking', 'Is look'], '命令文は動詞の元の形で始めます。'),
-  Q('(   ) go to the park.（公園に行きましょう。）　（ ）に入るのは？', ["Let's", 'Do', 'Please', 'Are'], '「〜しましょう」は Let\'s ～ で表します。'),
+  Q('(   ) go to the park.（公園に行きましょう。）　（ ）に入るのは？', ["Let's", 'Let', 'Is', 'Are'], '「〜しましょう」は Let\'s ～ で表します。'),
   Q('The cat is (   ) the table.（ねこはテーブルの上にいます。）　（ ）に入るのは？', ['on', 'in', 'under', 'at'], 'on = 〜の上に、in = 〜の中に、under = 〜の下に です。'),
   Q('I get up (   ) six.（わたしは6時に起きます。）　（ ）に入るのは？', ['at', 'in', 'on', 'for'], '時刻の前には at を使います。'),
   Q('My birthday is (   ) April.（わたしの誕生日は4月です。）　（ ）に入るのは？', ['in', 'at', 'on', 'to'], '月の前には in、曜日や日付の前には on を使います。'),

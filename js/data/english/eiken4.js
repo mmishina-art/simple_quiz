@@ -115,7 +115,7 @@ export default [
   Q('「hot（暑い）」の比較級は？', ['hotter', 'hoter', 'more hot', 'hottest'], 'hot は t を重ねて hotter になります。'),
   Q('「beautiful（美しい）」の比較級は？', ['more beautiful', 'beautifuler', 'most beautiful', 'beautifully'], '長い単語は more をつけて比較級にします。'),
   Q('Mt. Fuji is the (   ) mountain in Japan.　（ ）に入るのは？', ['highest', 'higher', 'high', 'most high'], '「いちばん高い」は the highest です。'),
-  Q('This is the (   ) popular song in our class.　（ ）に入るのは？', ['most', 'more', 'very', 'much'], 'popular の最上級は the most popular です。'),
+  Q('This is the (   ) popular song in our class.　（ ）に入るのは？', ['most', 'more', 'many', 'much'], 'popular の最上級は the most popular です。more は比較級（than とセット）、many・much は popular の前には置けません。'),
   Q('Were you busy yesterday? ― Yes, I (   ).　（ ）に入るのは？', ['was', 'were', 'did', 'am'], 'Were you ～? には、I を主語にして Yes, I was. と答えます。'),
   Q('Where (   ) you go last Sunday? ― I went to the zoo.　（ ）に入るのは？', ['did', 'do', 'were', 'are'], '過去のことをたずねる一般動詞の疑問文は、did を使います。'),
   Q('What did you do yesterday? ― I (   ) baseball.　（ ）に入るのは？', ['played', 'play', 'plays', 'playing'], 'きのうのことなので、過去形 played で答えます。'),
