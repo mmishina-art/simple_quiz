@@ -24,6 +24,7 @@ const APP_SHELL = [
   './js/data/school/sansu.js',
   './js/data/school/sansu-more.js',
   './js/data/school/rika.js',
+  './js/data/school/rika-more.js',
   './js/data/school/shakai.js',
   './js/data/school/shakai-more.js',
   './js/data/trivia.js',

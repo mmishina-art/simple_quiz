@@ -4,6 +4,7 @@ import kokugo from './school/kokugo.js';
 import sansu from './school/sansu.js';
 import sansuMore from './school/sansu-more.js';
 import rika from './school/rika.js';
+import rikaMore from './school/rika-more.js';
 import shakai from './school/shakai.js';
 import shakaiMore from './school/shakai-more.js';
 
@@ -18,6 +19,6 @@ export const schoolSubjects = [
 export const schoolQuestions = {
   kokugo,
   sansu: [...sansu, ...sansuMore],
-  rika,
+  rika: [...rika, ...rikaMore],
   shakai: [...shakai, ...shakaiMore],
 };
