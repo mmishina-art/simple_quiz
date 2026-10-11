@@ -42,6 +42,7 @@ export const isEnglish = (s) => /[A-Za-z].*[A-Za-z]/.test(s ?? '') && !/[ぁ-ん
 //   '「apple」の意味は？' → 'apple'
 //   'Do you like music? ― Yes, I (   ).　（ ）に入るのは？' → 'Do you like music? ― Yes, I (   ).'
 function englishPart(q) {
+  if (/[①-④]/.test(q)) return ''; // 並べかえ問題は、語句がばらばらなので読まない
   const quoted = q.match(/「([^」]*[A-Za-z][^」]*)」/);
   if (quoted && !/[ぁ-んァ-ン一-龯]/.test(quoted[1])) return quoted[1];
   const segs = q.match(/[A-Za-z0-9'".,!?()\s―—\-:]*[A-Za-z][A-Za-z0-9'".,!?()\s―—\-:]*/g) ?? [];
@@ -62,6 +63,7 @@ export function questionSpeech(q) {
 // 答えたあとに読む文（穴を正解でうめる。英語の正解だけのときは正解を読む）
 export function answerSpeech(q, answerText) {
   const part = englishPart(q.q);
+  if (/[①-④]/.test(q.q)) return '';
   if (part && BLANK.test(part) && isEnglish(answerText)) {
     return tidy(part.replace(BLANK, answerText));
   }
