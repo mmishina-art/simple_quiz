@@ -2,8 +2,10 @@
 // 教科ごとの問題は js/data/school/*.js にあります。
 import kokugo from './school/kokugo.js';
 import sansu from './school/sansu.js';
+import sansuMore from './school/sansu-more.js';
 import rika from './school/rika.js';
 import shakai from './school/shakai.js';
+import shakaiMore from './school/shakai-more.js';
 
 export const schoolSubjects = [
   { id: 'kokugo', name: '国語', icon: '📖', color: '#e8505b' },
@@ -12,4 +14,10 @@ export const schoolSubjects = [
   { id: 'shakai', name: '社会', icon: '🗾', color: '#f4a261' },
 ];
 
-export const schoolQuestions = { kokugo, sansu, rika, shakai };
+// 追加分は配列の最後につなげる（問題のIDがずれないように）
+export const schoolQuestions = {
+  kokugo,
+  sansu: [...sansu, ...sansuMore],
+  rika,
+  shakai: [...shakai, ...shakaiMore],
+};
