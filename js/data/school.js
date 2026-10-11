@@ -1,6 +1,7 @@
 // テスト対策モード（学校の勉強）の問題データ
 // 教科ごとの問題は js/data/school/*.js にあります。
 import kokugo from './school/kokugo.js';
+import kokugoMore from './school/kokugo-more.js';
 import sansu from './school/sansu.js';
 import sansuMore from './school/sansu-more.js';
 import rika from './school/rika.js';
@@ -17,7 +18,7 @@ export const schoolSubjects = [
 
 // 追加分は配列の最後につなげる（問題のIDがずれないように）
 export const schoolQuestions = {
-  kokugo,
+  kokugo: [...kokugo, ...kokugoMore],
   sansu: [...sansu, ...sansuMore],
   rika: [...rika, ...rikaMore],
   shakai: [...shakai, ...shakaiMore],
