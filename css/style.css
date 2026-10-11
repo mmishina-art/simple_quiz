@@ -709,3 +709,62 @@ ruby rt { font-size: 0.5em; font-weight: normal; color: var(--muted); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* ---------- 毎日の記録・バッジ・タイムアタック ---------- */
+.streak-text { margin: 4px 0 0; font-size: 12px; font-weight: bold; color: #e8590c; }
+
+.ta-btn {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 14px;
+  border: 2px solid #f08c00;
+  border-radius: var(--radius);
+  background: #fff4e0;
+  color: #b35c00;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+}
+.ta-btn:active { transform: scale(0.97); }
+.time-attack .progress-text { min-width: 5.5em; text-align: right; }
+.time-attack .progress-bar { background: #f08c00; transition: width 0.2s linear; }
+.ta-hurry .progress-bar { background: var(--wrong); }
+.ta-hurry .progress-text { color: var(--wrong); }
+
+.result-badges {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #fff3d6;
+  border: 2px solid #f4c430;
+  text-align: left;
+  animation: pop 0.5s ease;
+}
+.result-badges-title { margin: 0 0 4px; font-weight: bold; color: #8a5a00; text-align: center; }
+.result-badge { display: flex; align-items: center; gap: 8px; margin: 4px 0 0; font-size: 14px; }
+.result-badge .badge-icon { font-size: 26px; }
+
+.badge-stats { margin-top: 8px; }
+.badge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+.badge-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 6px;
+  border-radius: 14px;
+  background: #fff;
+  border: 2px solid var(--card-edge);
+  text-align: center;
+}
+.badge-item .badge-icon { font-size: 32px; line-height: 1.2; }
+.badge-item b { font-size: 14px; }
+.badge-item small { font-size: 11px; color: var(--muted); }
+.badge-item.locked { background: #f3ede4; opacity: 0.75; }
+.badge-item.locked .badge-icon { filter: grayscale(1); }

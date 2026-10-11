@@ -35,6 +35,7 @@
           <p class="buddy-stage">Lv.<span id="chara-level"></span>　<span id="chara-stage"></span></p>
           <div class="growth" role="progressbar" aria-label="つぎの進化まで"><div id="growth-bar" class="growth-bar"></div></div>
           <p id="growth-text" class="growth-text"></p>
+          <p id="streak-text" class="streak-text"></p>
         </div>
         <div id="dex" class="dex" aria-label="しんかのきろく"></div>
         <p class="buddy-hint">国語・算数・理科・社会・英語で正解した問題がふえると成長するよ</p>
@@ -70,6 +71,7 @@
       </div>
 
       <div class="home-footer">
+        <button id="badge-btn" class="chip">🏅 バッジ</button>
         <button id="sound-toggle" class="chip" aria-pressed="true">🔊 おと：オン</button>
         <button id="install-btn" class="chip" hidden>📲 アプリとして入れる</button>
         <button id="furigana-toggle" class="chip" aria-pressed="true">ふりがな：オン</button>
@@ -86,6 +88,7 @@
       <p class="hint">やりたい分野をえらんでね（1回 <span id="round-size"></span> 問）</p>
       <div id="category-list" class="category-list"></div>
       <button id="review-btn" class="review-btn" hidden></button>
+      <button id="ta-btn" class="ta-btn">⏱ 60びょう タイムアタック</button>
     </section>
 
     <!-- クイズ -->
@@ -135,6 +138,7 @@
         <p id="result-message" class="result-message"></p>
         <p id="result-best" class="result-best"></p>
         <p id="result-growth" class="result-growth"></p>
+        <div id="result-badges" class="result-badges" hidden></div>
       </div>
 
       <div class="result-actions">

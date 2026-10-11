@@ -80,6 +80,7 @@ export function encode(state) {
     n: state.charaName,
     j: state.jingle,
     o: state.sound,
+    r: { st: state.stats, sk: state.streak, bd: state.badges }, // 毎日の記録・バッジ
   };
   const json = JSON.stringify(payload);
   const body = toB64url(new TextEncoder().encode(json));
@@ -108,7 +109,26 @@ export function decode(text) {
     charaName: typeof p.n === 'string' ? p.n.slice(0, 8) : null,
     jingle: typeof p.j === 'string' ? p.j : null,
     sound: typeof p.o === 'boolean' ? p.o : null,
+    stats: obj(p.r?.st),
+    streak: obj(p.r?.sk),
+    badges: obj(p.r?.bd),
   };
+}
+const obj = (v) => (v && typeof v === 'object' && !Array.isArray(v) ? v : {});
+const num = (v) => (Number.isFinite(v) ? v : 0);
+
+// 数の記録は大きいほうをとる
+function mergeStats(a = {}, b = {}) {
+  const out = { ...b, ...a };
+  for (const k of ['answered', 'correct', 'rounds', 'perfectRounds', 'reviewFixed']) out[k] = Math.max(num(a[k]), num(b[k]));
+  out.taBest = { ...obj(b.taBest) };
+  for (const [m, v] of Object.entries(obj(a.taBest))) out.taBest[m] = Math.max(num(v), num(out.taBest[m]));
+  return out;
+}
+// れんぞく日数は、最後にやった日が新しいほうを使う（さいこう記録・日数は大きいほう）
+function mergeStreak(a = {}, b = {}) {
+  const newer = (b.last ?? '') > (a.last ?? '') ? b : a;
+  return { ...newer, best: Math.max(num(a.best), num(b.best)), days: Math.max(num(a.days), num(b.days)) };
 }
 
 // ファイルの中身（JSON）からコードを取り出す。コードだけのテキストファイルでもよい
@@ -140,6 +160,9 @@ export function merge(state, data, validIds) {
     // 名前は、いまが最初のまま（ピコ）なら読みこんだほうを使う
     charaName: state.charaName === 'ピコ' && data.charaName ? data.charaName : state.charaName,
     jingle: state.jingle ?? data.jingle,
+    stats: mergeStats(state.stats, data.stats),
+    streak: mergeStreak(state.streak, data.streak),
+    badges: { ...data.badges, ...state.badges },
   };
 }
 

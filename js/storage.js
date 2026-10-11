@@ -1,3 +1,5 @@
+import { emptyStats, emptyStreak } from './records.js';
+
 const KEY = 'simple-quiz:v1';
 
 const defaults = () => ({
@@ -11,6 +13,9 @@ const defaults = () => ({
   firstUsedAt: null, // はじめて使った日（バックアップのお知らせ用）
   lastBackupAt: null, // 最後にバックアップした日
   furigana: true, // 6年生以上の漢字にふりがなをつける
+  stats: emptyStats(), // 答えた数・正解数・タイムアタックのさいこう記録など
+  streak: emptyStreak(), // 毎日の記録（○日れんぞく）
+  badges: {}, // もらったバッジ { id: もらった日時 }
 });
 
 export function loadState() {

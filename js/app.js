@@ -9,10 +9,12 @@ import { initBackup } from './backup.js';
 import { rubyFragment } from './furigana.js';
 import { canSpeak, speak, stopSpeaking, questionSpeech, answerSpeech, isEnglish } from './speech.js';
 import { BUILDUP_SEC } from './jingles.js';
+import { recordAnswer, recordRound, currentStreak, checkBadges, BADGES } from './records.js';
 
 const ROUND_SIZE = 10;
 const CURRENT_GRADE = 5; // ひとまず5年生向け。学年を増やすときはここを設定画面から変えられるようにする。
 const CHOICE_MARKS = ['ア', 'イ', 'ウ', 'エ'];
+const TA_SEC = 60; // タイムアタックの時間（秒）
 
 const MODES = {
   school: {
@@ -116,6 +118,12 @@ function renderHomeBuddy() {
       innerHTML: charaSVG(i, 'normal'),
     })),
   );
+  const days = currentStreak(state);
+  const best = state.streak?.best ?? 0;
+  $('#streak-text').textContent = days > 0
+    ? `🔥 ${days}日れんぞく（さいこう ${best}日）`
+    : best > 0 ? `今日もやって れんぞく記録をのばそう！（さいこう ${best}日）` : '🔥 毎日やると「れんぞく日数」がふえるよ';
+  $('#badge-btn').textContent = `🏅 バッジ ${Object.keys(state.badges ?? {}).length}/${BADGES.length}`;
 }
 
 function buddyReact(kind) {
@@ -269,6 +277,10 @@ function openSelect(mode) {
   reviewBtn.textContent = `🔁 まちがえた問題をふくしゅう（${reviewCount}もん）`;
   reviewBtn.onclick = () => startQuiz(mode, REVIEW);
 
+  const taBest = state.stats?.taBest?.[mode];
+  $('#ta-btn').textContent = `⏱ ${TA_SEC}びょう タイムアタック${taBest ? `（さいこう ${taBest}もん）` : ''}`;
+  $('#ta-btn').onclick = () => startQuiz(mode, ALL, { timeAttack: true });
+
   show('select');
 }
 
@@ -291,15 +303,50 @@ function prepare(q) {
   return { ...q, shuffled: order.map((i) => q.choices[i]), correctIndex: order.indexOf(q.answer) };
 }
 
-function startQuiz(mode, cat) {
+function startQuiz(mode, cat, { timeAttack = false } = {}) {
   const pool = poolFor(mode, cat);
   if (pool.length === 0) return;
-  const questions = pickQuestions(pool, ROUND_SIZE).map(prepare);
-  session = { mode, cat, questions, index: 0, results: [] };
+  stopTimeAttack();
+  // タイムアタックは、時間内に答えきれないくらいの数を用意しておく
+  const questions = pickQuestions(pool, timeAttack ? 120 : ROUND_SIZE).map(prepare);
+  session = { mode, cat, questions, index: 0, results: [], timeAttack };
   session.solvedBefore = growth().solved;
-  $('.progress').setAttribute('aria-valuemax', String(questions.length));
+  $('.progress').setAttribute('aria-valuemax', String(timeAttack ? TA_SEC : questions.length));
+  $('#screen-quiz').classList.toggle('time-attack', timeAttack);
   show('quiz');
+  if (timeAttack) {
+    session.endAt = Date.now() + TA_SEC * 1000;
+    session.timer = setInterval(tickTimeAttack, 200);
+  }
   renderQuestion();
+}
+
+// ---------- タイムアタック ----------
+function tickTimeAttack() {
+  if (!session?.timeAttack || session.finished) return;
+  const left = Math.max(0, session.endAt - Date.now());
+  const sec = Math.ceil(left / 1000);
+  const correct = session.results.filter((r) => r.ok).length;
+  $('#progress-bar').style.width = `${(left / (TA_SEC * 1000)) * 100}%`;
+  $('.progress').setAttribute('aria-valuenow', String(sec));
+  $('#progress-text').textContent = `⏱${sec} ⭕${correct}`;
+  $('#screen-quiz').classList.toggle('ta-hurry', sec <= 10);
+  if (left <= 0) finishTimeAttack();
+}
+
+function stopTimeAttack() {
+  if (session?.timer) clearInterval(session.timer);
+  if (session) session.timer = null;
+  clearTimeout(session?.nextTimer);
+  $('#screen-quiz').classList.remove('ta-hurry');
+}
+
+function finishTimeAttack() {
+  if (session.finished) return;
+  session.finished = true;
+  stopTimeAttack();
+  sound.fanfare();
+  showResult();
 }
 
 function renderQuestion() {
@@ -307,9 +354,12 @@ function renderQuestion() {
   const q = questions[index];
   const info = categoryInfo(mode, q.cat);
 
-  $('#progress-bar').style.width = `${(index / questions.length) * 100}%`;
-  $('.progress').setAttribute('aria-valuenow', String(index));
-  $('#progress-text').textContent = `${index + 1} / ${questions.length}`;
+  if (session.timeAttack) tickTimeAttack();
+  else {
+    $('#progress-bar').style.width = `${(index / questions.length) * 100}%`;
+    $('.progress').setAttribute('aria-valuenow', String(index));
+    $('#progress-text').textContent = `${index + 1} / ${questions.length}`;
+  }
 
   const tag = $('#question-tag');
   tag.textContent = `${info.icon} ${info.name}`;
@@ -317,7 +367,7 @@ function renderQuestion() {
   rich($('#question-text'), q.q, { skipQuoted: noRubyAnswer(q) });
 
   // 英語モードでは、選択肢の英語も読み上げられるように 🔊 をつける
-  const english = mode === 'english' && canSpeak();
+  const english = mode === 'english' && canSpeak() && !session.timeAttack;
   const choices = $('#choices');
   choices.replaceChildren(
     ...q.shuffled.map((text, i) => {
@@ -333,10 +383,10 @@ function renderQuestion() {
     }),
   );
 
-  // 問題の英語を読み上げるボタン
+  // 問題の英語を読み上げるボタン（タイムアタックでは出さない）
   stopSpeaking();
   const speakBtn = $('#speak-btn');
-  const before = english ? questionSpeech(q) : '';
+  const before = english && !session.timeAttack ? questionSpeech(q) : '';
   speakBtn.hidden = !before;
   speakBtn.onclick = () => speak(before);
 
@@ -345,9 +395,12 @@ function renderQuestion() {
 }
 
 function answer(chosen) {
+  if (session.finished || session.answered === session.index) return;
+  session.answered = session.index;
   const q = session.questions[session.index];
   const ok = chosen === q.correctIndex;
   session.results.push({ q, chosen, ok });
+  recordAnswer(state, { ok, wasMistake: state.mistakes.includes(q.id) });
 
   [...$('#choices').querySelectorAll('.choice-btn')].forEach((btn, i) => {
     btn.disabled = true;
@@ -366,6 +419,13 @@ function answer(chosen) {
 
   ok ? sound.correct() : sound.wrong();
   if (!ok && navigator.vibrate) navigator.vibrate(120);
+
+  // タイムアタック：説明は出さずに、すぐつぎの問題へ（まちがえたときは正解を少し見せる）
+  if (session.timeAttack) {
+    tickTimeAttack();
+    session.nextTimer = setTimeout(next, ok ? 450 : 1000);
+    return;
+  }
 
   const fb = $('#feedback');
   fb.className = `feedback ${ok ? 'is-correct' : 'is-wrong'}`;
@@ -387,7 +447,12 @@ function answer(chosen) {
 }
 
 function next() {
+  if (session.finished) return;
   session.index++;
+  if (session.timeAttack && session.index >= session.questions.length) {
+    finishTimeAttack();
+    return;
+  }
   if (session.index < session.questions.length) {
     renderQuestion();
     window.scrollTo(0, 0);
@@ -398,14 +463,18 @@ function next() {
 
 // ---------- 結果 ----------
 function showResult() {
-  const { results, mode, cat } = session;
+  const { results, mode, cat, timeAttack } = session;
   const total = results.length;
   const correct = results.filter((r) => r.ok).length;
-  const rate = correct / total;
+  // タイムアタックは正解の数で、ふつうは正解の割合で ほめかたを決める
+  const rate = timeAttack ? Math.min(1, correct / 20) : total ? correct / total : 0;
+
+  const taRecord = recordRound(state, { total, correct, timeAttack, mode });
+  const prevStage = growth().stage;
 
   // 10問そろっているときだけ「さいこう点」を記録（ふくしゅうは記録しない）
   let newRecord = false;
-  if (cat !== REVIEW && total === ROUND_SIZE) {
+  if (!timeAttack && cat !== REVIEW && total === ROUND_SIZE) {
     const key = bestKey(mode, cat);
     if (state.best[key] == null || correct > state.best[key]) {
       newRecord = state.best[key] != null;
@@ -426,6 +495,23 @@ function showResult() {
           : 'ふりかえってもう一回やってみよう！📚';
   const best = state.best[bestKey(mode, cat)];
   $('#result-best').textContent = newRecord ? '🏆 さいこう記録こうしん！' : best != null && cat !== REVIEW ? `さいこう記録：${best}点` : '';
+  if (timeAttack) {
+    $('#result-message').textContent = `⏱ ${TA_SEC}びょうで ${correct}もん せいかい！${correct >= 20 ? '🌩' : correct >= 10 ? '⚡' : ''}`;
+    $('#result-best').textContent = taRecord ? '🏆 さいこう記録こうしん！' : `さいこう記録：${state.stats.taBest[mode] ?? 0}もん`;
+  }
+
+  // バッジ
+  const earned = checkBadges(state, badgeContext(prevStage));
+  saveState(state);
+  const badgeBox = $('#result-badges');
+  badgeBox.hidden = earned.length === 0;
+  badgeBox.replaceChildren(
+    el('p', { class: 'result-badges-title', textContent: '🏅 バッジをゲット！' }),
+    ...earned.map((b) => el('p', { class: 'result-badge' }, [
+      el('span', { class: 'badge-icon', textContent: b.icon, ariaHidden: 'true' }),
+      el('span', { textContent: `${b.name}（${b.hint}）` }),
+    ])),
+  );
 
   $('#result-list').replaceChildren(
     ...results.map(({ q, chosen, ok }) =>
@@ -447,10 +533,45 @@ function showResult() {
     ? `🌱 ${state.charaName}の習得率 ${Math.floor(g.rate * 100)}%（あたらしく正解 +${gained}問）`
     : '';
 
-  if (rate >= 0.7) sound.fanfare();
+  if (rate >= 0.7 && !timeAttack) sound.fanfare();
+  else if (earned.length) sound.fanfare();
   show('result');
   setChara($('#result-chara'), g.shown, rate >= 0.7 ? 'happy' : rate >= 0.4 ? 'cheer' : 'sad');
   say($('#result-bubble'), rate === 1 ? 'かんぺき！！' : rate >= 0.7 ? 'よくがんばったね！' : rate >= 0.4 ? 'つぎもいっしょにがんばろう！' : 'ふくしゅうしよう！');
+}
+
+// ---------- バッジ ----------
+function badgeContext(stage = growth().stage) {
+  const solved = new Set(state.solved);
+  const rateOf = (list) => (list.length ? list.filter((q) => solved.has(q.id)).length / list.length : 0);
+  return {
+    subjectRate: (cat) => rateOf(cat === 'english' ? Object.values(MODES.english.questions).flat() : MODES.school.questions[cat] ?? []),
+    triviaSolved: state.solved.filter((id) => id.startsWith('trivia:')).length,
+    stage: Math.max(stage, state.stageSeen),
+  };
+}
+
+function openBadges() {
+  const got = state.badges ?? {};
+  const fmt = (t) => { const d = new Date(t); return `${d.getMonth() + 1}/${d.getDate()}`; };
+  const panel = el('div', { class: 'sheet', id: 'badge-panel' });
+  const close = () => panel.remove();
+  panel.addEventListener('click', (e) => { if (e.target === panel) close(); });
+  const s = state.stats ?? {};
+  panel.append(el('div', { class: 'sheet-body' }, [
+    el('div', { class: 'sheet-head' }, [
+      el('h2', { textContent: `🏅 バッジ ${Object.keys(got).length}/${BADGES.length}` }),
+      el('button', { class: 'chip', textContent: 'とじる', onclick: close }),
+    ]),
+    el('p', { class: 'sheet-note badge-stats', textContent:
+      `といた数 ${s.answered ?? 0}問・正解 ${s.correct ?? 0}問・れんぞく さいこう ${state.streak?.best ?? 0}日・勉強した日 ${state.streak?.days ?? 0}日` }),
+    el('div', { class: 'badge-grid' }, BADGES.map((b) => el('div', { class: `badge-item${got[b.id] ? '' : ' locked'}` }, [
+      el('span', { class: 'badge-icon', textContent: got[b.id] ? b.icon : '🔒', ariaHidden: 'true' }),
+      el('b', { textContent: got[b.id] ? b.name : '？？？' }),
+      el('small', { textContent: got[b.id] ? `${b.hint}（${fmt(got[b.id])}）` : b.hint }),
+    ]))),
+  ]));
+  document.body.append(panel);
 }
 
 // ---------- イベント ----------
@@ -467,13 +588,18 @@ document.querySelectorAll('[data-mode]').forEach((btn) => btn.addEventListener('
 document.querySelectorAll('[data-go="home"]').forEach((btn) => btn.addEventListener('click', () => show('home')));
 $('#next-btn').addEventListener('click', next);
 $('#quit-btn').addEventListener('click', () => {
-  if (session.results.length === 0 || confirm('クイズをやめてもいい？')) openSelect(session.mode);
+  if (session.results.length === 0 || confirm('クイズをやめてもいい？')) {
+    session.finished = true;
+    stopTimeAttack();
+    openSelect(session.mode);
+  }
 });
 $('#retry-btn').addEventListener('click', () => {
   // ふくしゅうで全部正解したら問題がなくなるので、分野選択にもどる
   if (poolFor(session.mode, session.cat).length === 0) openSelect(session.mode);
-  else startQuiz(session.mode, session.cat);
+  else startQuiz(session.mode, session.cat, { timeAttack: session.timeAttack });
 });
+$('#badge-btn').addEventListener('click', openBadges);
 
 const soundBtn = $('#sound-toggle');
 function renderSoundBtn() {
