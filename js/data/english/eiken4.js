@@ -49,13 +49,13 @@ export default [
   Q('This book is (   ) interesting than that one.　（ ）に入るのは？', ['more', 'most', 'very', 'much'], 'interesting のような長い単語は、more をつけて比較級にします。'),
   Q('Tom runs as (   ) as Ken.（トムはケンと同じくらい速く走ります。）　（ ）に入るのは？', ['fast', 'faster', 'fastest', 'more fast'], '「〜と同じくらい…」は as + 元の形 + as です。'),
   Q('「good（よい）」の比較級は？', ['better', 'gooder', 'best', 'more good'], 'good → better → best と形が変わります。'),
-  Q('Which do you like (   ), dogs or cats? ― I like cats.　（ ）に入るのは？', ['better', 'good', 'well', 'best'], '2つをくらべて「どちらが好きか」は like ～ better で表します。'),
+  Q('Which do you like (   ), dogs or cats? ― I like cats better.　（ ）に入るのは？', ['better', 'good', 'well', 'best'], '2つをくらべて「どちらのほうが好きか」は like ～ better で表します。best は3つ以上の中で「いちばん」のときに使います。'),
 
   // ---- 不定詞・動名詞 ----
   Q('I want (   ) be a doctor.（わたしは医者になりたいです。）　（ ）に入るのは？', ['to', 'for', 'at', 'with'], '「〜したい」は want to + 動詞の元の形 です。'),
   Q('I enjoyed (   ) with my friends.　（ ）に入るのは？', ['talking', 'talk', 'to talk', 'talked'], 'enjoy のあとには、動詞の ing 形が来ます。'),
   Q('He finished (   ) the book.　（ ）に入るのは？', ['reading', 'read', 'to read', 'reads'], 'finish のあとには、動詞の ing 形が来ます。'),
-  Q('I went to the library (   ) study.（勉強するために図書館に行きました。）　（ ）に入るのは？', ['to', 'for', 'and', 'but'], '「〜するために」は to + 動詞の元の形 で表します。'),
+  Q('I went to the library (   ) study.（勉強するために図書館に行きました。）　（ ）に入るのは？', ['to', 'in', 'and', 'but'], '「〜するために」は to + 動詞の元の形 で表します。and なら過去形 studied にする必要があります。'),
   Q('How (   ) going to the zoo?（動物園に行くのはどう？）　（ ）に入るのは？', ['about', 'for', 'many', 'old'], 'How about ～ing? で「〜するのはどうですか」とさそいます。'),
 
   // ---- There is / 助動詞 ----

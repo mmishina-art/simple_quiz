@@ -3,6 +3,7 @@
 import eiken5 from './english/eiken5.js';
 import eiken5more from './english/eiken5-more.js';
 import eiken4 from './english/eiken4.js';
+import eiken4more from './english/eiken4-more.js';
 import eiken3 from './english/eiken3.js';
 
 export const englishCategories = [
@@ -12,4 +13,4 @@ export const englishCategories = [
 ];
 
 // 追加分は配列の最後につなげる（問題のIDがずれないように）
-export const englishQuestions = { eiken5: [...eiken5, ...eiken5more], eiken4, eiken3 };
+export const englishQuestions = { eiken5: [...eiken5, ...eiken5more], eiken4: [...eiken4, ...eiken4more], eiken3 };
