@@ -5,6 +5,7 @@ import { createSound } from './sound.js';
 import { loadState, saveState } from './storage.js';
 import { charaSVG, line, stageFor, STAGES, MAX_STAGE, THRESHOLDS } from './chara.js';
 import { initDebug } from './debug.js';
+import { initBackup } from './backup.js';
 import { BUILDUP_SEC } from './jingles.js';
 
 const ROUND_SIZE = 10;
@@ -452,6 +453,13 @@ $('#home-buddy').addEventListener('click', () => {
   clearTimeout(chara._timer);
   chara._timer = setTimeout(() => setChara(chara, stage, 'normal'), 1600);
 });
+// データのバックアップ／ひきつぎ（ホームの「ほごしゃの方へ」）
+initBackup({
+  state, saveState, growth, renderHomeBuddy, checkEvolution,
+  growthIds: GROWTH_IDS,
+  allIds: new Set(Object.values(MODES).flatMap((m) => Object.values(m.questions).flat().map((q) => q.id))),
+});
+
 // デバッグモード（?debug をURLにつけるか、タイトルを7回タップ）
 initDebug({
   state, saveState, growth, setChara, renderHomeBuddy, playEvolution, checkEvolution, say, line, sound,

@@ -8,6 +8,8 @@ const defaults = () => ({
   stageSeen: 0, // 進化の演出を見せたところまでの段階
   charaName: 'ピコ',
   jingle: null, // 進化のときのジングル（null ならおすすめの「レトロゲーム」。js/jingles.js）
+  firstUsedAt: null, // はじめて使った日（バックアップのお知らせ用）
+  lastBackupAt: null, // 最後にバックアップした日
 });
 
 export function loadState() {
