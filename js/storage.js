@@ -10,6 +10,7 @@ const defaults = () => ({
   jingle: null, // 進化のときのジングル（null ならおすすめの「レトロゲーム」。js/jingles.js）
   firstUsedAt: null, // はじめて使った日（バックアップのお知らせ用）
   lastBackupAt: null, // 最後にバックアップした日
+  furigana: true, // 6年生以上の漢字にふりがなをつける
 });
 
 export function loadState() {

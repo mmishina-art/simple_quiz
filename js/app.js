@@ -6,6 +6,8 @@ import { loadState, saveState } from './storage.js';
 import { charaSVG, line, stageFor, STAGES, MAX_STAGE, THRESHOLDS } from './chara.js';
 import { initDebug } from './debug.js';
 import { initBackup } from './backup.js';
+import { rubyFragment } from './furigana.js';
+import { canSpeak, speak, stopSpeaking, questionSpeech, answerSpeech, isEnglish } from './speech.js';
 import { BUILDUP_SEC } from './jingles.js';
 
 const ROUND_SIZE = 10;
@@ -211,6 +213,14 @@ function el(tag, props = {}, children = []) {
   return node;
 }
 
+// 文字を表示する（ふりがながオンなら、むずかしい漢字に読みがなをつける）
+function rich(node, text, opts) {
+  node.replaceChildren(state.furigana ? rubyFragment(text ?? '', opts) : (text ?? ''));
+  return node;
+}
+// 国語では、問題の「」の中と選択肢にはふりがなをつけない（読み方の問題で答えが分かってしまうため）
+const noRubyAnswer = (q) => q.cat === 'kokugo';
+
 function categoryInfo(mode, cat) {
   if (cat === ALL) return { name: 'ぜんぶ', icon: '🌈', color: 'var(--primary)' };
   if (cat === REVIEW) return { name: 'ふくしゅう', icon: '🔁', color: 'var(--wrong)' };
@@ -263,16 +273,28 @@ function openSelect(mode) {
 }
 
 // ---------- クイズ ----------
+// 出す問題をえらぶ。まだ正解していない問題を優先し、まちがえた問題も少しまぜる。
+// 足りないときだけ、もう正解した問題から出す。
+function pickQuestions(pool, n) {
+  const solved = new Set(state.solved);
+  const missed = new Set(state.mistakes);
+  const mistakes = shuffle(pool.filter((q) => missed.has(q.id)));
+  const unsolved = shuffle(pool.filter((q) => !solved.has(q.id) && !missed.has(q.id)));
+  const done = shuffle(pool.filter((q) => solved.has(q.id) && !missed.has(q.id)));
+  const order = [...mistakes.slice(0, 3), ...unsolved, ...mistakes.slice(3), ...done];
+  return shuffle(order.slice(0, n));
+}
+
+// 選択肢をシャッフルして、正解の位置を記録しなおす
+function prepare(q) {
+  const order = shuffle(q.choices.map((_, i) => i));
+  return { ...q, shuffled: order.map((i) => q.choices[i]), correctIndex: order.indexOf(q.answer) };
+}
+
 function startQuiz(mode, cat) {
   const pool = poolFor(mode, cat);
   if (pool.length === 0) return;
-  const questions = shuffle(pool)
-    .slice(0, ROUND_SIZE)
-    .map((q) => {
-      // 選択肢をシャッフルして、正解の位置を記録しなおす
-      const order = shuffle(q.choices.map((_, i) => i));
-      return { ...q, shuffled: order.map((i) => q.choices[i]), correctIndex: order.indexOf(q.answer) };
-    });
+  const questions = pickQuestions(pool, ROUND_SIZE).map(prepare);
   session = { mode, cat, questions, index: 0, results: [] };
   session.solvedBefore = growth().solved;
   $('.progress').setAttribute('aria-valuemax', String(questions.length));
@@ -292,17 +314,31 @@ function renderQuestion() {
   const tag = $('#question-tag');
   tag.textContent = `${info.icon} ${info.name}`;
   tag.style.setProperty('--tag-color', info.color);
-  $('#question-text').textContent = q.q;
+  rich($('#question-text'), q.q, { skipQuoted: noRubyAnswer(q) });
 
+  // 英語モードでは、選択肢の英語も読み上げられるように 🔊 をつける
+  const english = mode === 'english' && canSpeak();
   const choices = $('#choices');
   choices.replaceChildren(
-    ...q.shuffled.map((text, i) =>
-      el('button', { class: 'choice-btn', onclick: () => answer(i) }, [
+    ...q.shuffled.map((text, i) => {
+      const btn = el('button', { class: 'choice-btn', onclick: () => answer(i) }, [
         el('span', { class: 'choice-mark', textContent: CHOICE_MARKS[i] }),
-        el('span', { textContent: text }),
-      ]),
-    ),
+        noRubyAnswer(q) ? el('span', { textContent: text }) : rich(el('span'), text),
+      ]);
+      if (!(english && isEnglish(text))) return btn;
+      return el('div', { class: 'choice-row' }, [
+        btn,
+        el('button', { class: 'speak-btn small', textContent: '🔊', ariaLabel: `「${text}」を読み上げる`, onclick: () => speak(text) }),
+      ]);
+    }),
   );
+
+  // 問題の英語を読み上げるボタン
+  stopSpeaking();
+  const speakBtn = $('#speak-btn');
+  const before = english ? questionSpeech(q) : '';
+  speakBtn.hidden = !before;
+  speakBtn.onclick = () => speak(before);
 
   $('#feedback').hidden = true;
   buddyReact('cheer');
@@ -313,7 +349,7 @@ function answer(chosen) {
   const ok = chosen === q.correctIndex;
   session.results.push({ q, chosen, ok });
 
-  [...$('#choices').children].forEach((btn, i) => {
+  [...$('#choices').querySelectorAll('.choice-btn')].forEach((btn, i) => {
     btn.disabled = true;
     if (i === q.correctIndex) btn.classList.add('correct');
     else if (i === chosen) btn.classList.add('wrong');
@@ -323,8 +359,8 @@ function answer(chosen) {
   // ふくしゅうリストの更新：まちがえたら追加、正解したら外す
   state.mistakes = state.mistakes.filter((id) => id !== q.id);
   if (!ok) state.mistakes.push(q.id);
-  // キャラの成長：5教科で初めて正解した問題を記録
-  if (ok && GROWTH_IDS.has(q.id) && !state.solved.includes(q.id)) state.solved.push(q.id);
+  // 一度でも正解した問題を記録（出題の優先順位に使う。キャラの成長は5教科の分だけ数える）
+  if (ok && !state.solved.includes(q.id)) state.solved.push(q.id);
   saveState(state);
   buddyReact(ok ? 'happy' : 'sad');
 
@@ -333,8 +369,17 @@ function answer(chosen) {
 
   const fb = $('#feedback');
   fb.className = `feedback ${ok ? 'is-correct' : 'is-wrong'}`;
-  $('#feedback-title').textContent = ok ? '⭕ せいかい！' : `❌ ざんねん… こたえは「${q.shuffled[q.correctIndex]}」`;
-  $('#feedback-explain').textContent = q.explain ?? '';
+  rich($('#feedback-title'), ok ? '⭕ せいかい！' : `❌ ざんねん… こたえは「${q.shuffled[q.correctIndex]}」`, { skipQuoted: noRubyAnswer(q) });
+  rich($('#feedback-explain'), q.explain ?? '');
+
+  // 英語モード：答えたあとは、正解を入れた文を読む（おとがオンなら自動で1回）
+  if (session.mode === 'english' && canSpeak()) {
+    const after = answerSpeech(q, q.shuffled[q.correctIndex]);
+    const speakBtn = $('#speak-btn');
+    speakBtn.hidden = !after;
+    speakBtn.onclick = () => speak(after);
+    if (after && state.sound) setTimeout(() => speak(after), 500);
+  }
   $('#next-btn').textContent = session.index + 1 < session.questions.length ? 'つぎへ ▶' : 'けっかを見る ▶';
   fb.hidden = false;
   $('#next-btn').focus({ preventScroll: true });
@@ -385,13 +430,13 @@ function showResult() {
   $('#result-list').replaceChildren(
     ...results.map(({ q, chosen, ok }) =>
       el('li', { class: ok ? 'ok' : 'ng' }, [
-        el('div', { class: 'rq', textContent: `${ok ? '⭕' : '❌'} ${q.q}` }),
+        rich(el('div', { class: 'rq' }), `${ok ? '⭕' : '❌'} ${q.q}`, { skipQuoted: noRubyAnswer(q) }),
         el('div', { class: 'ra' }, [
           'こたえ：',
-          el('b', { textContent: q.shuffled[q.correctIndex] }),
+          noRubyAnswer(q) ? el('b', { textContent: q.shuffled[q.correctIndex] }) : rich(el('b'), q.shuffled[q.correctIndex]),
           ok ? '' : `（えらんだのは「${q.shuffled[chosen]}」）`,
         ]),
-        q.explain ? el('div', { class: 'ra', textContent: q.explain }) : '',
+        q.explain ? rich(el('div', { class: 'ra' }), q.explain) : '',
       ]),
     ),
   );
@@ -412,7 +457,7 @@ function showResult() {
 // どのボタンを押しても音が出るようにする（答えのボタンは正解・不正解の音が出るので除く）
 document.addEventListener('click', (e) => {
   const btn = e.target.closest('button');
-  if (!btn || btn.disabled || btn.classList.contains('choice-btn')) return;
+  if (!btn || btn.disabled || btn.classList.contains('choice-btn') || btn.classList.contains('speak-btn')) return;
   if (btn.id === 'home-buddy') sound.boing();
   else if (btn.classList.contains('back-btn') || btn.dataset.go === 'home') sound.back();
   else sound.tap();
@@ -442,6 +487,19 @@ soundBtn.addEventListener('click', () => {
   sound.correct();
 });
 renderSoundBtn();
+
+const furiganaBtn = $('#furigana-toggle');
+function renderFuriganaBtn() {
+  furiganaBtn.textContent = state.furigana ? 'ふりがな：オン' : 'ふりがな：オフ';
+  furiganaBtn.setAttribute('aria-pressed', String(state.furigana));
+  document.body.classList.toggle('furigana-on', state.furigana);
+}
+furiganaBtn.addEventListener('click', () => {
+  state.furigana = !state.furigana;
+  saveState(state);
+  renderFuriganaBtn();
+});
+renderFuriganaBtn();
 
 $('#grade-label').textContent = `${CURRENT_GRADE}年生`;
 
