@@ -64,8 +64,8 @@
   if (!('serviceWorker' in navigator)) return;
   window.addEventListener('load', function () {
     navigator.serviceWorker.register('sw.js').then(function (reg) {
-      // 新しいバージョンは自動で有効になる（sw.js の skipWaiting）。
-      // 使っている最中に勝手に読みこみ直すとクイズがとぎれるので、お知らせを出して、おしたら読みこみ直す
+      // 新しいバージョンは待機する（sw.js は自分では skipWaiting しない）。
+      // 使っている最中に勝手に読みこみ直すとクイズがとぎれるので、お知らせを出して、おしたら切りかえて読みこみ直す
       function promptUpdate(worker) {
         if (!window.__appStarted) { worker.postMessage('skipWaiting'); return; }
         var toast = document.getElementById('update-toast');
