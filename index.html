@@ -73,6 +73,7 @@
       <div class="home-footer">
         <button id="badge-btn" class="chip">🏅 バッジ</button>
         <button id="sound-toggle" class="chip" aria-pressed="true">🔊 おと：オン</button>
+        <button id="install-open" class="chip">📲 アプリにする方法</button>
         <button id="install-btn" class="chip" hidden>📲 アプリとして入れる</button>
         <button id="furigana-toggle" class="chip" aria-pressed="true">ふりがな：オン</button>
         <button id="parent-btn" class="chip">⚙️ ほごしゃの方へ</button>
@@ -160,6 +161,38 @@
     <p id="evolve-msg" class="evolve-msg"></p>
     <button id="evolve-ok" class="primary-btn evolve-ok" hidden>やったー！</button>
   </div>
+
+  <!-- アプリにする方法（ホームから開く） -->
+  <dialog id="install-dialog" class="install-dialog" aria-labelledby="install-title">
+    <h2 id="install-title">ホームがめんに入れよう</h2>
+    <p class="install-lead">ホームがめんからすぐ開けて、ネットがなくても あそべます。（おうちの人といっしょにやってね）</p>
+    <details data-platform="ios">
+      <summary>iPhone / iPad</summary>
+      <ol>
+        <li><strong>Safari</strong> でこのページを開く</li>
+        <li>「きょうゆう」ボタン（□から↑が出ているマーク）をタップ</li>
+        <li>「<strong>ホーム画面に追加</strong>」をえらぶ</li>
+        <li>右上の「追加」をタップ</li>
+      </ol>
+    </details>
+    <details data-platform="android">
+      <summary>Android</summary>
+      <ol>
+        <li><strong>Chrome</strong> でこのページを開く</li>
+        <li>右上のメニュー（⋮）をタップ</li>
+        <li>「<strong>アプリをインストール</strong>」か「ホーム画面に追加」をえらぶ</li>
+        <li>「インストール」をタップ</li>
+      </ol>
+    </details>
+    <details data-platform="pc">
+      <summary>パソコン（Chrome / Edge）</summary>
+      <ol>
+        <li>アドレスバーの右はしにある、インストールのマークをクリック</li>
+        <li>「<strong>インストール</strong>」をえらぶ</li>
+      </ol>
+    </details>
+    <button type="button" class="primary-btn" data-close>とじる</button>
+  </dialog>
 
   <div id="update-toast" class="toast" hidden>
     新しいバージョンがあります
