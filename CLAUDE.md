@@ -20,16 +20,15 @@ npm test       # node scripts/validate-questions.mjs(問題データの検証)
 - **アプリのファイルを変えたら `sw.js` の `CACHE_VERSION` を上げる**(利用者に更新が届く)。
 - **ファイルを追加/削除したら `sw.js` の `APP_SHELL` を更新する。**
 - **`.github/workflows/pages.yml` の「Collect site files」が公開するファイルを列挙している**(`cp -r index.html manifest.webmanifest sw.js css js icons _site/`)。新しいトップレベルのファイル/フォルダを足したら、ここにも追加しないと公開されない。
-- 現在の Service Worker は `skipWaiting()` で新版へ即時切り替え(標準は「更新」ボタン方式)。変えるときは別 PR で。
+- 新しいバージョンは待機し、画面の「こうしん」ボタン(`js/boot.js` が `skipWaiting` メッセージを送る)で切り替える。`sw.js` の `install` で `skipWaiting()` を呼ばない。
 
 ## 現状と標準のずれ(直すときは別 PR で)
 
 - 配色は「明るい固定」(`color-scheme: light only`)。これは意図した方針(スマホがダークモードでも明るい画面のまま)。変えない。
+- バージョン表示がない → ホーム画面に表示したい(元は `sw.js` の `CACHE_VERSION` と同じ番号にする)。
 - デフォルトブランチが `claude/elementary-quiz-game-pwa-rrqwqt`(`main` がない)。公開もこのブランチから行われる。標準は `main`。切り替えるときは、Pages の公開ブランチと `pages.yml` の `branches` を一緒に直す。
-- `pages.yml` が公開専用で、PR 時のテストがない → `test.yml` を追加したい。
-- Lint(ESLint)がない。
-- `maskable-512.png` は専用ファイルがある(OK)。
-- インストール方法: ホームの「📲 アプリとして入れる」ボタンは `beforeinstallprompt` が使えるとき(Android / パソコンの Chrome・Edge)にしか出ない。iPhone 向けの手順(共有 → ホーム画面に追加)の説明がない。
+
+対応済み: 更新ボタン方式(`install` で `skipWaiting()` しない)、PR 時のテスト(`test.yml`)、ESLint、専用の maskable アイコン、インストール方法の説明(ホームの「📲 アプリにする方法」)。
 
 ## 共通ルール(PWA アプリ共通)
 
@@ -46,4 +45,5 @@ npm test       # node scripts/validate-questions.mjs(問題データの検証)
 - 効果音は Web Audio で合成し、オン/オフ設定を用意する。
 - iPhone の安全領域(`env(safe-area-inset-*)`)を考慮する。
 - **最初の画面(タイトル/ホーム)に、インストール方法の説明への入口を置く。** iPhone は自動のインストール案内が出ないため、手順(iPhone / iPad は Safari の共有 → ホーム画面に追加、Android は Chrome のメニュー → アプリをインストール、パソコンはアドレスバーのインストールのマーク)を見せる。今使っている端末の説明を最初から開き、`beforeinstallprompt` が使えるときは「今すぐインストール」も出す。インストール済み(`display-mode: standalone`)のときは入口を出さない。実装の手本はテンプレート `mmishina-art/pwa-template` の `src/install.ts`。
+- **タイトル画面(最初の画面)にバージョンを表示する**(例: `v1.2`)。更新が反映されたかを、利用者がひと目で確認できるようにするため。バージョンの元は1か所に置き、公開のたびに上げる。キャッシュ優先の Service Worker を手で書いている場合は、キャッシュ名の番号と同じにして、食い違いをテストで検出する。
 - 変更を終える前にテストを通し、`python3 -m http.server` などで実際に起動して動作を確認する。
