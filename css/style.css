@@ -798,3 +798,6 @@ ruby rt { font-size: 0.5em; font-weight: normal; color: var(--muted); }
 }
 .install-dialog ol { margin: 0 0 8px; padding-left: 1.4em; font-size: 16px; line-height: 1.7; }
 .install-dialog .primary-btn { display: block; width: 100%; margin-top: 8px; }
+
+/* ---------- バージョン表示（ホームの一番下） ---------- */
+.app-version { margin: 12px 0 0; text-align: center; font-size: 12px; color: var(--muted); }

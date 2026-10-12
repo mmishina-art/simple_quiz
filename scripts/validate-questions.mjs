@@ -1,6 +1,7 @@
 // 問題データのチェック: node scripts/validate-questions.mjs
 import { readFileSync, readdirSync } from 'node:fs';
 import './check-install.mjs';
+import './check-pwa.mjs';
 import { schoolSubjects, schoolQuestions } from '../js/data/school.js';
 import { triviaCategories, triviaQuestions } from '../js/data/trivia.js';
 import { englishCategories, englishQuestions } from '../js/data/english.js';

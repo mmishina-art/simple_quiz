@@ -7,6 +7,7 @@ import { charaSVG, line, stageFor, STAGES, MAX_STAGE, THRESHOLDS } from './chara
 import { initDebug } from './debug.js';
 import { initBackup } from './backup.js';
 import { setupInstallGuide } from './install.js';
+import { APP_VERSION } from './version.js';
 import { rubyFragment } from './furigana.js';
 import { canSpeak, speak, stopSpeaking, questionSpeech, answerSpeech, isEnglish } from './speech.js';
 import { BUILDUP_SEC } from './jingles.js';
@@ -664,6 +665,7 @@ show('home');
 
 // ---------- PWA ----------
 setupInstallGuide($('#install-open'), $('#install-dialog'));
+$('#app-version').textContent = APP_VERSION;
 let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
