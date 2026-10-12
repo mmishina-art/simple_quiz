@@ -21,6 +21,7 @@ npm test       # node scripts/validate-questions.mjs(問題データの検証)
 - **ファイルを追加/削除したら `sw.js` の `APP_SHELL` を更新する。**
 - **`.github/workflows/pages.yml` の「Collect site files」が公開するファイルを列挙している**(`cp -r index.html manifest.webmanifest sw.js css js icons _site/`)。新しいトップレベルのファイル/フォルダを足したら、ここにも追加しないと公開されない。
 - 新しいバージョンは待機し、画面の「こうしん」ボタン(`js/boot.js` が `skipWaiting` メッセージを送る)で切り替える。`sw.js` の `install` で `skipWaiting()` を呼ばない。
+- **起動失敗の復旧(`js/boot.js`)と、`sw.js` の古いキャッシュの片づけは、このアプリの Service Worker(`scope` が自分の置き場所)とキャッシュ(`simple-quiz-` で始まる名前)だけを対象にする**(同じサイトのほかのアプリのものを消さない。`npm test` の `scripts/check-pwa.mjs` が確認する)。
 
 ## 現状と標準のずれ(直すときは別 PR で)
 
@@ -48,6 +49,7 @@ npm test       # node scripts/validate-questions.mjs(問題データの検証)
 - **PR は1つの目的にする。** 他の PR の上に積まない(積むときは、本文に「どの PR の上か」を書き、下の PR から順にマージする)。デフォルトブランチは `main`。
 - **保存データには版番号(`schemaVersion` など)を持たせ、保存の形を変えるときは移行処理を書く。記録を残すアプリは、ファイルへの書き出し / 読み込みを用意する**(`localStorage` は、ブラウザの都合で消えることがある。特に iPhone)。手本はテンプレートの `src/backup.ts` と `src/storage.ts`、または `simple_quiz` の `js/backup.js`。
 - **起動に失敗したときの復旧を用意する。** キャッシュ優先の Service Worker は、ファイルが食い違うと起動しなくなることがある。メインとは別の普通のスクリプトで、起動できなかったとき、キャッシュを消して読み込み直す(1回目は自動、2分以内の2回目は「なおす」ボタン)。保存データは消さない。手本は `simple_quiz` の `js/boot.js` とテンプレートの `public/boot.js`。
+- **同じサイトに載るアプリ: 名前をアプリごとに別にする。** GitHub Pages では、すべてのアプリが同じサイト(`mmishina-art.github.io`)に載り、`localStorage`・`sessionStorage`・Service Worker・キャッシュはサイトの単位で共有される。保存データのキー、バックアップの `app` 名、キャッシュ名、`sessionStorage` のキーは、アプリごとに別の名前(接頭辞)にする。起動失敗の復旧(`boot.js`)と、Service Worker の古いキャッシュの片づけは、**自分のアプリの Service Worker とキャッシュだけ**を対象にする(`k !== CACHE` のように「自分以外すべて」を消さない)。
 - **外部のリソース(Web フォント、CDN のスクリプトなど)に頼らない。** オフラインで動かなくなるため。使うなら、Service Worker のキャッシュ対象にする。
 - **画像・音・問題文・文章は、自作するか、ライセンスを README に明記する。**
 - 画面を変えたら、スマホの幅・小さい画面(iPhone SE の大きさ)・ダークモード(対応しているアプリ)で実際に表示して確認する(スクリーンショットを見る)。PR の本文に、確認したこと(実機か、していないか)を書く。
