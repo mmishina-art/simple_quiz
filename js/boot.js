@@ -3,22 +3,32 @@
 //  ・Service Worker（オフライン対応）の登録と「新しいバージョンがあります」の表示
 //  ・アプリが起動できなかったときの自動修復（保存しているキャッシュを消して読みこみ直す）
 //    ※ 学習の記録やキャラの成長（localStorage）は消しません
+//    ※ 消すのは、このアプリの Service Worker とキャッシュだけです（同じサイトのほかのアプリのものは消しません）
 (function () {
   'use strict';
-  var REPAIR_KEY = 'simple-quiz:repaired-at';
+  // このアプリの置き場所と ID。GitHub Pages では、すべてのアプリが同じサイトに載り、
+  // Service Worker とキャッシュはサイトの単位で見えるので、範囲を絞らないと、ほかのアプリのキャッシュまで消してしまいます。
+  var BASE = new URL('./', location.href).href;
+  var APP_ID = 'simple-quiz';
+  var REPAIR_KEY = APP_ID + ':repaired-at';
   var userAsked = false;
+
+  // このアプリの Service Worker か（scope がこのアプリの置き場所と同じ）
+  function isMyRegistration(reg) { return reg.scope === BASE; }
+  // このアプリのキャッシュか（名前が「ID-」で始まる。sw.js の CACHE_NAME と同じ）
+  function isMyCache(name) { return name.indexOf(APP_ID + '-') === 0; }
 
   // ---------- 起動できなかったときの修復 ----------
   function repair() {
     var jobs = [];
     if ('serviceWorker' in navigator) {
       jobs.push(navigator.serviceWorker.getRegistrations().then(function (regs) {
-        return Promise.all(regs.map(function (r) { return r.unregister(); }));
+        return Promise.all(regs.filter(isMyRegistration).map(function (r) { return r.unregister(); }));
       }));
     }
     if (window.caches) {
       jobs.push(caches.keys().then(function (keys) {
-        return Promise.all(keys.map(function (k) { return caches.delete(k); }));
+        return Promise.all(keys.filter(isMyCache).map(function (k) { return caches.delete(k); }));
       }));
     }
     return Promise.all(jobs).catch(function () {}).then(function () {
