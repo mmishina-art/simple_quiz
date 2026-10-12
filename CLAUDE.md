@@ -17,7 +17,7 @@ npm test       # node scripts/validate-questions.mjs(問題データの検証)
 
 ## 更新時の必須作業
 
-- **アプリのファイルを変えたら `sw.js` の `CACHE_VERSION` を上げる**(利用者に更新が届く)。
+- **アプリのファイルを変えたら `sw.js` の `CACHE_VERSION` を上げる**(利用者に更新が届く)。**`js/version.js` の `APP_VERSION` も同じ番号にする**(ホーム画面の下に表示される。食い違うと `npm test` が失敗する)。
 - **ファイルを追加/削除したら `sw.js` の `APP_SHELL` を更新する。**
 - **`.github/workflows/pages.yml` の「Collect site files」が公開するファイルを列挙している**(`cp -r index.html manifest.webmanifest sw.js css js icons _site/`)。新しいトップレベルのファイル/フォルダを足したら、ここにも追加しないと公開されない。
 - 新しいバージョンは待機し、画面の「こうしん」ボタン(`js/boot.js` が `skipWaiting` メッセージを送る)で切り替える。`sw.js` の `install` で `skipWaiting()` を呼ばない。
@@ -25,10 +25,9 @@ npm test       # node scripts/validate-questions.mjs(問題データの検証)
 ## 現状と標準のずれ(直すときは別 PR で)
 
 - 配色は「明るい固定」(`color-scheme: light only`)。これは意図した方針(スマホがダークモードでも明るい画面のまま)。変えない。
-- バージョン表示がない → ホーム画面に表示したい(元は `sw.js` の `CACHE_VERSION` と同じ番号にする)。
 - README に、問題文・画像・音の出どころ(自作かライセンス)の記載が一部(進化の音は「どれもオリジナル」)しかない。問題の出典・参考にした教材の記載がない。
 
-対応済み: 更新ボタン方式(`install` で `skipWaiting()` しない)、PR 時のテスト(`test.yml`)、ESLint、専用の maskable アイコン、インストール方法の説明(ホームの「📲 アプリにする方法」)、起動失敗時の復旧(`js/boot.js`)、バックアップ / ひきつぎ(`js/backup.js`。コードに版 `QZ1` を持つ)、名前の表示は `textContent`、デフォルトブランチを `main` に変更(公開は `main` への push のみ)、Dependabot(`.github/dependabot.yml`。npmは毎週、Actions は毎月)。
+対応済み: 更新ボタン方式(`install` で `skipWaiting()` しない)、PR 時のテスト(`test.yml`)、ESLint、専用の maskable アイコン、インストール方法の説明(ホームの「📲 アプリにする方法」)、起動失敗時の復旧(`js/boot.js`)、バックアップ / ひきつぎ(`js/backup.js`。コードに版 `QZ1` を持つ)、名前の表示は `textContent`、デフォルトブランチを `main` に変更(公開は `main` への push のみ)、Dependabot(`.github/dependabot.yml`。npmは毎週、Actions は毎月)、バージョン表示(ホーム画面の下。`js/version.js`)。
 
 ## 共通ルール(PWA アプリ共通)
 
