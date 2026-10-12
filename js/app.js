@@ -6,6 +6,7 @@ import { loadState, saveState } from './storage.js';
 import { charaSVG, line, stageFor, STAGES, MAX_STAGE, THRESHOLDS } from './chara.js';
 import { initDebug } from './debug.js';
 import { initBackup } from './backup.js';
+import { setupInstallGuide } from './install.js';
 import { rubyFragment } from './furigana.js';
 import { canSpeak, speak, stopSpeaking, questionSpeech, answerSpeech, isEnglish } from './speech.js';
 import { BUILDUP_SEC } from './jingles.js';
@@ -662,6 +663,7 @@ $('#rename-btn').addEventListener('click', () => {
 show('home');
 
 // ---------- PWA ----------
+setupInstallGuide($('#install-open'), $('#install-dialog'));
 let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();

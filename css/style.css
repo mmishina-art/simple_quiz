@@ -768,3 +768,33 @@ ruby rt { font-size: 0.5em; font-weight: normal; color: var(--muted); }
 .badge-item small { font-size: 11px; color: var(--muted); }
 .badge-item.locked { background: #f3ede4; opacity: 0.75; }
 .badge-item.locked .badge-icon { filter: grayscale(1); }
+
+/* ---------- アプリにする方法 ---------- */
+.install-dialog {
+  width: min(520px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  padding: 16px;
+  background: var(--surface);
+  color: var(--text);
+  border: 2px solid var(--card-edge);
+  border-radius: var(--radius);
+}
+.install-dialog::backdrop { background: rgba(0, 0, 0, 0.5); }
+.install-dialog h2 { font-size: 20px; margin: 0 0 4px; }
+.install-lead { margin: 0 0 8px; font-size: 14px; color: var(--muted); line-height: 1.6; }
+.install-dialog details {
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 2px 12px;
+  margin: 8px 0;
+}
+.install-dialog summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+  cursor: pointer;
+}
+.install-dialog ol { margin: 0 0 8px; padding-left: 1.4em; font-size: 16px; line-height: 1.7; }
+.install-dialog .primary-btn { display: block; width: 100%; margin-top: 8px; }
