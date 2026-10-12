@@ -27,6 +27,7 @@ npm test       # node scripts/validate-questions.mjs(問題データの検証)
 
 - 配色は「明るい固定」(`color-scheme: light only`)。これは意図した方針(スマホがダークモードでも明るい画面のまま)。変えない。
 - README に、問題文・画像・音の出どころ(自作かライセンス)の記載が一部(進化の音は「どれもオリジナル」)しかない。問題の出典・参考にした教材の記載がない。
+- 画面の上端: `viewport-fit=cover` で、上端の余白は `max(16px, env(safe-area-inset-top))`、`apple-mobile-web-app-status-bar-style` は未指定。上のぼかしの報告は、今のところない。ぼやけて見えたら、このルールに合わせる(明るい固定なので、ステータスバーは `default` を明示し、上端の余白を `--safe-top` に)。
 
 対応済み: 更新ボタン方式(`install` で `skipWaiting()` しない)、PR 時のテスト(`test.yml`)、ESLint、専用の maskable アイコン、インストール方法の説明(ホームの「📲 アプリにする方法」)、起動失敗時の復旧(`js/boot.js`)、バックアップ / ひきつぎ(`js/backup.js`。コードに版 `QZ1` を持つ)、名前の表示は `textContent`、デフォルトブランチを `main` に変更(公開は `main` への push のみ)、Dependabot(`.github/dependabot.yml`。npmは毎週、Actions は毎月)、バージョン表示(ホーム画面の下。`js/version.js`)。
 
@@ -50,6 +51,7 @@ npm test       # node scripts/validate-questions.mjs(問題データの検証)
 - **保存データには版番号(`schemaVersion` など)を持たせ、保存の形を変えるときは移行処理を書く。記録を残すアプリは、ファイルへの書き出し / 読み込みを用意する**(`localStorage` は、ブラウザの都合で消えることがある。特に iPhone)。手本はテンプレートの `src/backup.ts` と `src/storage.ts`、または `simple_quiz` の `js/backup.js`。
 - **起動に失敗したときの復旧を用意する。** キャッシュ優先の Service Worker は、ファイルが食い違うと起動しなくなることがある。メインとは別の普通のスクリプトで、起動できなかったとき、キャッシュを消して読み込み直す(1回目は自動、2分以内の2回目は「なおす」ボタン)。保存データは消さない。手本は `simple_quiz` の `js/boot.js` とテンプレートの `public/boot.js`。
 - **同じサイトに載るアプリ: 名前をアプリごとに別にする。** GitHub Pages では、すべてのアプリが同じサイト(`mmishina-art.github.io`)に載り、`localStorage`・`sessionStorage`・Service Worker・キャッシュはサイトの単位で共有される。保存データのキー、バックアップの `app` 名、キャッシュ名、`sessionStorage` のキーは、アプリごとに別の名前(接頭辞)にする。起動失敗の復旧(`boot.js`)と、Service Worker の古いキャッシュの片づけは、**自分のアプリの Service Worker とキャッシュだけ**を対象にする(`k !== CACHE` のように「自分以外すべて」を消さない)。
+- **iPhone の画面の上端(ぼかしの帯)を避ける。** ホーム画面アプリで、ステータスバーの下に内容が入り込むと、iOS がそこをぼかして、上端の文字が読みにくくなる(`simple_chess`・`simple_blackjack`・`simple_shogi` で起きた)。`index.html` の `apple-mobile-web-app-status-bar-style` は**不透明**にし(暗い固定: `black` / 明るい固定: `default`。**`black-translucent` にしない**)、上端の余白は `env(safe-area-inset-top)` だけにせず、`--safe-top`(安全領域 + `--top-gap` の 24px)を使う。画面の高さから上の余白を引いて計算しているところは、同じ式で連動させる(忘れると、ぴったり収まっていた画面がはみ出してスクロールする)。ブラウザでは再現できないので、実機の iPhone で確認する。手本は、テンプレート `mmishina-art/pwa-template` の `src/style.css` と `scripts/check-dist.mjs`。
 - **外部のリソース(Web フォント、CDN のスクリプトなど)に頼らない。** オフラインで動かなくなるため。使うなら、Service Worker のキャッシュ対象にする。
 - **画像・音・問題文・文章は、自作するか、ライセンスを README に明記する。**
 - 画面を変えたら、スマホの幅・小さい画面(iPhone SE の大きさ)・ダークモード(対応しているアプリ)で実際に表示して確認する(スクリーンショットを見る)。PR の本文に、確認したこと(実機か、していないか)を書く。
