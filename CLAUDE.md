@@ -26,11 +26,10 @@ npm test       # node scripts/validate-questions.mjs(問題データの検証)
 
 - 配色は「明るい固定」(`color-scheme: light only`)。これは意図した方針(スマホがダークモードでも明るい画面のまま)。変えない。
 - バージョン表示がない → ホーム画面に表示したい(元は `sw.js` の `CACHE_VERSION` と同じ番号にする)。
-- デフォルトブランチが `claude/elementary-quiz-game-pwa-rrqwqt`(`main` がない)。公開もこのブランチから行われる。標準は `main`。切り替えるときは、Pages の公開ブランチと `pages.yml` の `branches` を一緒に直す。
 - Dependabot の設定がない。
 - README に、問題文・画像・音の出どころ(自作かライセンス)の記載が一部(進化の音は「どれもオリジナル」)しかない。問題の出典・参考にした教材の記載がない。
 
-対応済み: 更新ボタン方式(`install` で `skipWaiting()` しない)、PR 時のテスト(`test.yml`)、ESLint、専用の maskable アイコン、インストール方法の説明(ホームの「📲 アプリにする方法」)、起動失敗時の復旧(`js/boot.js`)、バックアップ / ひきつぎ(`js/backup.js`。コードに版 `QZ1` を持つ)、名前の表示は `textContent`。
+対応済み: 更新ボタン方式(`install` で `skipWaiting()` しない)、PR 時のテスト(`test.yml`)、ESLint、専用の maskable アイコン、インストール方法の説明(ホームの「📲 アプリにする方法」)、起動失敗時の復旧(`js/boot.js`)、バックアップ / ひきつぎ(`js/backup.js`。コードに版 `QZ1` を持つ)、名前の表示は `textContent`、デフォルトブランチを `main` に変更(公開は `main` への push のみ)。
 
 ## 共通ルール(PWA アプリ共通)
 

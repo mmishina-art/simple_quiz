@@ -2,9 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches:
-      - main
-      - claude/elementary-quiz-game-pwa-rrqwqt
+    branches: [main]
   workflow_dispatch:
 
 permissions:
